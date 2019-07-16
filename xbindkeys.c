@@ -51,8 +51,6 @@ static void start_as_daemon (void);
 
 Display *current_display;  // The current display
 
-extern char rc_file[512];
-
 extern char rc_guile_file[512];
 
 extern int poll_rc;
@@ -111,11 +109,7 @@ inner_main (int argc, char **argv)
   if (get_rc_guile_file () != 0)
     {
 
-      if (get_rc_file () != 0)
-	{
-	  end_it_all (d);
 	  exit (-1);
-	}
 
     }
 
@@ -160,8 +154,6 @@ main (int argc, char** argv)
   scm_boot_guile(0,(char**)NULL,(void *)inner_main,NULL);
   return 0; /* not reached ...*/
 }
-
-
 
 
 static Display *
@@ -237,8 +229,6 @@ event_loop (Display * d)
 {
   XEvent e;
   int i;
-  struct stat rc_file_info;
-  time_t rc_file_changed = 0;
 
   time_t rc_guile_file_changed = 0;
   struct stat rc_guile_file_info;
@@ -247,8 +237,6 @@ event_loop (Display * d)
 
   if (poll_rc)
     {
-      stat(rc_file, &rc_file_info);
-      rc_file_changed = rc_file_info.st_mtime;
 
       stat (rc_guile_file, &rc_guile_file_info);
       rc_guile_file_changed = rc_guile_file_info.st_mtime;
@@ -259,26 +247,18 @@ event_loop (Display * d)
     {
       while(poll_rc && !XPending(d))
 	{
-	  // if the rc file has been modified, reload it
-	  stat (rc_file, &rc_file_info);
 
 	  // if the rc guile file has been modified, reload it
 	  stat (rc_guile_file, &rc_guile_file_info);
 
 
-	  if (rc_file_info.st_mtime != rc_file_changed
-
-	      || rc_guile_file_info.st_mtime != rc_guile_file_changed
-
-	      )
+	  if (rc_guile_file_info.st_mtime != rc_guile_file_changed)
 	    {
 	      reload_rc_file ();
 	      if (verbose)
 		{
 		  printf ("The configuration file has been modified, reload it\n");
 		}
-	      rc_file_changed = rc_file_info.st_mtime;
-
 	      rc_guile_file_changed = rc_guile_file_info.st_mtime;
 
 	    }
@@ -475,11 +455,9 @@ reload_rc_file (void)
   if (get_rc_guile_file () != 0)
     {
 
-      if (get_rc_file () != 0)
-	{
-	  end_it_all (current_display);
-	  exit (-1);
-	}
+      end_it_all (current_display);
+      exit (-1);
+
 
     }
 
