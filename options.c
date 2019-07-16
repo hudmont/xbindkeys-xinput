@@ -47,17 +47,17 @@ static void show_help (void);
 
 static void show_defaults_guile_rc (void);
 int init_xbk_guile_fns (void);
-SCM_int set_numlock_wrapper (SCM_int x);
-SCM_int set_scrolllock_wrapper (SCM_int x);
-SCM_int set_capslock_wrapper (SCM_int x);
-SCM_int xbindkey_wrapper(SCM_int key, SCM_int cmd);
-SCM_int xbindkey_function_wrapper(SCM_int key, SCM_int fun);
-SCM_int remove_xbindkey_wrapper(SCM_int key);
-SCM_int run_command_wrapper (SCM_int command);
-SCM_int grab_all_keys_wrapper (void);
-SCM_int ungrab_all_keys_wrapper (void);
-SCM_int remove_all_keys_wrapper (void);
-SCM_int debug_info_wrapper (void);
+SCM set_numlock_wrapper (SCM x);
+SCM set_scrolllock_wrapper (SCM x);
+SCM set_capslock_wrapper (SCM x);
+SCM xbindkey_wrapper(SCM key, SCM cmd);
+SCM xbindkey_function_wrapper(SCM key, SCM fun);
+SCM remove_xbindkey_wrapper(SCM key);
+SCM run_command_wrapper (SCM command);
+SCM grab_all_keys_wrapper (void);
+SCM ungrab_all_keys_wrapper (void);
+SCM remove_all_keys_wrapper (void);
+SCM debug_info_wrapper (void);
 
 void
 get_options (int argc, char **argv)
@@ -463,7 +463,7 @@ get_rc_guile_file (void)
 }
 
 #define MAKE_MASK_WRAPPER(name, mask_name) \
-SCM_int name (SCM_int val) \
+SCM name (SCM val) \
 { \
   if (verbose) \
     printf("Running mask cmd!\n"); \
@@ -477,7 +477,7 @@ MAKE_MASK_WRAPPER(set_capslock_wrapper, capslock_mask);
 
 
 
-SCM_int extract_key (SCM_int key, KeyType_t *type, EventType_t *event_type,
+SCM extract_key (SCM key, KeyType_t *type, EventType_t *event_type,
 		 KeySym *keysym, KeyCode *keycode,
 		 unsigned int *button, unsigned int *modifier)
 {
@@ -494,7 +494,7 @@ SCM_int extract_key (SCM_int key, KeyType_t *type, EventType_t *event_type,
     //So copy it:
     //Guile strings are not \0 terminated. hence we must copy.
     if (scm_is_true(scm_symbol_p(SCM_CAR(key)))) {
-      SCM_int newkey = scm_symbol_to_string(SCM_CAR(key));
+      SCM newkey = scm_symbol_to_string(SCM_CAR(key));
       str = scm_to_locale_string(newkey);
     } else {
       str = scm_to_locale_string(SCM_CAR(key));
@@ -545,7 +545,7 @@ SCM_int extract_key (SCM_int key, KeyType_t *type, EventType_t *event_type,
   //So copy it:
   //Guile strings are not \0 terminated. hence we must copy.
   if (scm_is_true(scm_symbol_p(key))) {
-    SCM_int newkey = scm_symbol_to_string(key);
+    SCM newkey = scm_symbol_to_string(key);
     str = scm_to_locale_string(newkey);
   } else {
     str = scm_to_locale_string(key);
@@ -596,7 +596,7 @@ SCM_int extract_key (SCM_int key, KeyType_t *type, EventType_t *event_type,
 
 
 
-SCM_int xbindkey_wrapper(SCM_int key, SCM_int cmd)
+SCM xbindkey_wrapper(SCM key, SCM cmd)
 {
   KeyType_t type = SYM;
   EventType_t event_type = PRESS;
@@ -630,9 +630,9 @@ SCM_int xbindkey_wrapper(SCM_int key, SCM_int cmd)
 }
 
 
-SCM_int tab_scm[2];
+SCM tab_scm[2];
 
-SCM_int xbindkey_function_wrapper (SCM_int key, SCM_int fun)
+SCM xbindkey_function_wrapper (SCM key, SCM fun)
 {
   KeyType_t type = SYM;
   EventType_t event_type = PRESS;
@@ -667,7 +667,7 @@ SCM_int xbindkey_function_wrapper (SCM_int key, SCM_int fun)
 
 
 
-SCM_int remove_xbindkey_wrapper (SCM_int key)
+SCM remove_xbindkey_wrapper (SCM key)
 {
   KeyType_t type = SYM;
   EventType_t event_type = PRESS;
@@ -693,7 +693,7 @@ SCM_int remove_xbindkey_wrapper (SCM_int key)
 }
 
 
-SCM_int run_command_wrapper (SCM_int command)
+SCM run_command_wrapper (SCM command)
 {
   char *cmdstr;
 
@@ -706,7 +706,7 @@ SCM_int run_command_wrapper (SCM_int command)
   return SCM_UNSPECIFIED;
 }
 
-SCM_int grab_all_keys_wrapper (void)
+SCM grab_all_keys_wrapper (void)
 {
   grab_keys (current_display);
 
@@ -714,14 +714,14 @@ SCM_int grab_all_keys_wrapper (void)
 }
 
 
-SCM_int ungrab_all_keys_wrapper (void)
+SCM ungrab_all_keys_wrapper (void)
 {
   ungrab_all_keys (current_display);
 
   return SCM_UNSPECIFIED;
 }
 
-SCM_int remove_all_keys_wrapper (void)
+SCM remove_all_keys_wrapper (void)
 {
   close_keys ();
 
@@ -729,7 +729,7 @@ SCM_int remove_all_keys_wrapper (void)
 }
 
 
-SCM_int debug_info_wrapper (void)
+SCM debug_info_wrapper (void)
 {
   printf ("\nKeys = %p\n", keys);
   printf ("nb_keys = %d\n", nb_keys);

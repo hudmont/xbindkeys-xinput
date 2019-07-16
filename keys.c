@@ -35,7 +35,7 @@
 int nb_keys;
 Keys_t *keys;
 
-extern char rc_file[512];
+extern char rc_guile_file[512];
 
 static char *modifier_string[] = { "Control", "Shift", "Alt", "Mod2",
   "Mod3", "Mod4", "Mod5"
@@ -72,16 +72,16 @@ close_keys (void)
 
 int
 add_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keycode,
-	 unsigned int button, unsigned int modifier, char *command, SCM_int function)
+	 unsigned int button, unsigned int modifier, char *command, SCM function)
 {
   Keys_t *keys_bis = NULL;
   int i;
-
+  /*
   if (keysym == 0 && keycode == 0 && button == 0)
     {
       fprintf (stderr, "Warning: unknown key in RC file : %s\n", rc_file);
       return (-1);
-    }
+      }*/
 
   /* make new array keys_bis */
   keys_bis = (Keys_t *) malloc ((nb_keys + 1) * sizeof (Keys_t));
@@ -252,7 +252,7 @@ print_key (Display * d, Keys_t * key)
 
 void
 set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
-	    unsigned int modifier, char *command, SCM_int function)
+	    unsigned int modifier, char *command, SCM function)
 {
   key->type = SYM;
   key->event_type = event_type;
@@ -283,7 +283,7 @@ set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
 
 void
 set_keycode (Keys_t * key, EventType_t event_type, KeyCode keycode,
-	     unsigned int modifier, char *command, SCM_int function)
+	     unsigned int modifier, char *command, SCM function)
 {
   key->type = CODE;
   key->event_type = event_type;
@@ -308,7 +308,7 @@ set_keycode (Keys_t * key, EventType_t event_type, KeyCode keycode,
 
 void
 set_button (Keys_t * key, EventType_t event_type, unsigned int button,
-	    unsigned int modifier, char *command, SCM_int function)
+	    unsigned int modifier, char *command, SCM function)
 {
   key->type = BUTTON;
   key->event_type = event_type;
