@@ -243,8 +243,6 @@ event_loop (Display * d)
   time_t rc_guile_file_changed = 0;
   struct stat rc_guile_file_info;
 
-
-
   XSetErrorHandler ((XErrorHandler) null_X_error);
 
   if (poll_rc)
