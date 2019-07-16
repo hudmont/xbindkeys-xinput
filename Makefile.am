@@ -1,12 +1,7 @@
 bin_PROGRAMS=xbindkeys
 
-if GUILE
 AM_CFLAGS=@CFLAGS@ @X_CFLAGS@ @FORK_FLAG@ @GUILE_FLAG@ @GUILE_CFLAGS@ -I. -Wall
 xbindkeys_LDADD=@X_LIBS@ @GUILE_LDFLAGS@
-else
-AM_CFLAGS=@CFLAGS@ @X_CFLAGS@ @FORK_FLAG@ @GUILE_FLAG@ -I. -Wall
-xbindkeys_LDADD=@X_LIBS@
-endif
 
 xbindkeys_SOURCES=xbindkeys.c xbindkeys.h \
 		keys.h keys.c \

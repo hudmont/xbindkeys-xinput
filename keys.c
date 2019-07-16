@@ -72,7 +72,7 @@ close_keys (void)
 
 int
 add_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keycode,
-	 unsigned int button, unsigned int modifier, char *command, SCM function)
+	 unsigned int button, unsigned int modifier, char *command, SCM_int function)
 {
   Keys_t *keys_bis = NULL;
   int i;
@@ -252,7 +252,7 @@ print_key (Display * d, Keys_t * key)
 
 void
 set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
-	    unsigned int modifier, char *command, SCM function)
+	    unsigned int modifier, char *command, SCM_int function)
 {
   key->type = SYM;
   key->event_type = event_type;
@@ -283,7 +283,7 @@ set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
 
 void
 set_keycode (Keys_t * key, EventType_t event_type, KeyCode keycode,
-	     unsigned int modifier, char *command, SCM function)
+	     unsigned int modifier, char *command, SCM_int function)
 {
   key->type = CODE;
   key->event_type = event_type;
@@ -308,7 +308,7 @@ set_keycode (Keys_t * key, EventType_t event_type, KeyCode keycode,
 
 void
 set_button (Keys_t * key, EventType_t event_type, unsigned int button,
-	    unsigned int modifier, char *command, SCM function)
+	    unsigned int modifier, char *command, SCM_int function)
 {
   key->type = BUTTON;
   key->event_type = event_type;

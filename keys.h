@@ -32,7 +32,7 @@ typedef enum
 EventType_t;
 
 
-typedef int SCM;
+typedef int SCM_int;
 
 
 typedef struct
@@ -51,7 +51,7 @@ typedef struct
 
   unsigned int modifier;
   char *command;
-  SCM function;    // This is to call a scheme function instead of a shell command
+  SCM_int function;    // This is to call a scheme function instead of a shell command
                    // when command == NULL (not used when guile is not used).
 }
 Keys_t;
@@ -62,7 +62,7 @@ extern void close_keys (void);
 
 extern int add_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keycode,
 		    unsigned int button, unsigned int modifier,
-		    char *command, SCM function);
+		    char *command, SCM_int function);
 
 extern int remove_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keycode,
 		       unsigned int button, unsigned int modifier);
@@ -73,11 +73,11 @@ extern void show_key_binding (Display * d);
 extern void print_key (Display * d, Keys_t * key);
 
 extern void set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
-			unsigned int modifier, char *command, SCM function);
+			unsigned int modifier, char *command, SCM_int function);
 extern void set_keycode (Keys_t * key, EventType_t event_type, KeyCode keycode,
-			 unsigned int modifier, char *command, SCM function);
+			 unsigned int modifier, char *command, SCM_int function);
 extern void set_button (Keys_t * key, EventType_t event_type, unsigned int button,
-			unsigned int modifier, char *command, SCM function);
+			unsigned int modifier, char *command, SCM_int function);
 
 extern void free_key (Keys_t * key);
 
