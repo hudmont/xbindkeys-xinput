@@ -25,9 +25,9 @@ extern void show_options (void);
 extern int rc_file_exist (void);
 
 extern int get_rc_file (void);
-#ifdef GUILE_FLAG
+
 extern int get_rc_guile_file (void);
-#endif
+
 
 
 extern char *display_name;

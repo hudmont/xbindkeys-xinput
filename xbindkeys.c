@@ -32,9 +32,8 @@
 #include "get_key.h"
 #include "grab_key.h"
 
-#ifdef GUILE_FLAG
+
 #include <libguile.h>
-#endif
 
 #include <X11/XKBlib.h>
 
@@ -53,28 +52,24 @@ static void start_as_daemon (void);
 Display *current_display;  // The current display
 
 extern char rc_file[512];
-#ifdef GUILE_FLAG
+
 extern char rc_guile_file[512];
-#endif
+
 extern int poll_rc;
 
 #define SLEEP_TIME 100
 
-#ifndef GUILE_FLAG
-int
-main (int argc, char **argv)
-#else
+
 int argc_t; char** argv_t;
 void
 inner_main (int argc, char **argv)
-#endif
 {
   Display *d;
 
-#ifdef GUILE_FLAG
+
   argc = argc_t;
   argv = argv_t;
-#endif
+
 
   get_options (argc, argv);
 
@@ -112,18 +107,18 @@ inner_main (int argc, char **argv)
       exit (0);
     }
 
-#ifdef GUILE_FLAG
+
   if (get_rc_guile_file () != 0)
     {
-#endif
+
       if (get_rc_file () != 0)
 	{
 	  end_it_all (d);
 	  exit (-1);
 	}
-#ifdef GUILE_FLAG
+
     }
-#endif
+
 
 
   if (have_to_show_binding)
@@ -148,12 +143,12 @@ inner_main (int argc, char **argv)
     printf ("ending...\n");
   end_it_all (d);
 
-#ifndef GUILE_FLAG
+
   return (0);			/* not reached... */
-#endif
+
 }
 
-#ifdef GUILE_FLAG
+
 int
 main (int argc, char** argv)
 {
@@ -165,7 +160,7 @@ main (int argc, char** argv)
   scm_boot_guile(0,(char**)NULL,(void *)inner_main,NULL);
   return 0; /* not reached ...*/
 }
-#endif
+
 
 
 
@@ -244,10 +239,10 @@ event_loop (Display * d)
   int i;
   struct stat rc_file_info;
   time_t rc_file_changed = 0;
-#ifdef GUILE_FLAG
+
   time_t rc_guile_file_changed = 0;
   struct stat rc_guile_file_info;
-#endif
+
 
 
   XSetErrorHandler ((XErrorHandler) null_X_error);
@@ -256,10 +251,10 @@ event_loop (Display * d)
     {
       stat(rc_file, &rc_file_info);
       rc_file_changed = rc_file_info.st_mtime;
-#ifdef GUILE_FLAG
+
       stat (rc_guile_file, &rc_guile_file_info);
       rc_guile_file_changed = rc_guile_file_info.st_mtime;
-#endif
+
     }
 
   while (True)
@@ -268,15 +263,15 @@ event_loop (Display * d)
 	{
 	  // if the rc file has been modified, reload it
 	  stat (rc_file, &rc_file_info);
-#ifdef GUILE_FLAG
+
 	  // if the rc guile file has been modified, reload it
 	  stat (rc_guile_file, &rc_guile_file_info);
-#endif
+
 
 	  if (rc_file_info.st_mtime != rc_file_changed
-#ifdef GUILE_FLAG
+
 	      || rc_guile_file_info.st_mtime != rc_guile_file_changed
-#endif
+
 	      )
 	    {
 	      reload_rc_file ();
@@ -285,9 +280,9 @@ event_loop (Display * d)
 		  printf ("The configuration file has been modified, reload it\n");
 		}
 	      rc_file_changed = rc_file_info.st_mtime;
-#ifdef GUILE_FLAG
+
 	      rc_guile_file_changed = rc_guile_file_info.st_mtime;
-#endif
+
 	    }
 
 	  usleep(SLEEP_TIME*1000);
@@ -478,18 +473,18 @@ reload_rc_file (void)
     }
   close_keys ();
 
-#ifdef GUILE_FLAG
+
   if (get_rc_guile_file () != 0)
     {
-#endif
+
       if (get_rc_file () != 0)
 	{
 	  end_it_all (current_display);
 	  exit (-1);
 	}
-#ifdef GUILE_FLAG
+
     }
-#endif
+
 
   grab_keys (current_display);
 }

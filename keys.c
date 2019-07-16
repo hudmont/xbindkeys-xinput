@@ -274,9 +274,9 @@ set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
   key->function = function;
 
   //  printf("******************* ICICICICICI *********************\n");
-  //#ifdef GUILE_FLAG
+  //
   //  printf("  name=%d\n", SCM_IMP (key->function));
-  //#endif
+  //
 
   //  scm_permanent_object (key->function);
 }
@@ -447,12 +447,12 @@ start_command_key (Keys_t * key)
 {
   if (key->command == NULL)
     {
-#ifdef GUILE_FLAG
+
       if (key->function != 0)
 	{
 	  scm_call_0 (key->function);
 	}
-#endif
+
       return;
     }
 

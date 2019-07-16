@@ -19,9 +19,9 @@
 #define __KEYS_H
 
 #include <X11/Xlib.h>
-#ifdef GUILE_FLAG
+
 #include <libguile.h>
-#endif
+
 
 typedef enum
   { SYM, CODE, BUTTON }
@@ -31,9 +31,9 @@ typedef enum
   { PRESS, RELEASE}
 EventType_t;
 
-#ifndef GUILE_FLAG
+
 typedef int SCM;
-#endif
+
 
 typedef struct
 {

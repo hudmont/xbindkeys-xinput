@@ -26,16 +26,13 @@
 #include "keys.h"
 #include "grab_key.h"
 
-#ifdef GUILE_FLAG
 #include <libguile.h>
-#endif
 
 char *display_name = NULL;
 
 char rc_file[512];
-#ifdef GUILE_FLAG
+
 char rc_guile_file[512];
-#endif
 
 int verbose = 0;
 int poll_rc = 0;
@@ -50,7 +47,7 @@ char *geom = NULL;
 static void show_version (void);
 static void show_help (void);
 static void show_defaults_rc (void);
-#ifdef GUILE_FLAG
+
 static void show_defaults_guile_rc (void);
 int init_xbk_guile_fns (void);
 SCM set_numlock_wrapper (SCM x);
@@ -64,9 +61,6 @@ SCM grab_all_keys_wrapper (void);
 SCM ungrab_all_keys_wrapper (void);
 SCM remove_all_keys_wrapper (void);
 SCM debug_info_wrapper (void);
-#endif
-
-
 
 void
 get_options (int argc, char **argv)
@@ -75,9 +69,8 @@ get_options (int argc, char **argv)
   char *home;
 
   strncpy (rc_file, "", sizeof(rc_file));
-#ifdef GUILE_FLAG
+
   strncpy (rc_guile_file, "", sizeof (rc_guile_file));
-#endif
 
   verbose = 0;
   have_to_show_binding = 0;
@@ -102,13 +95,13 @@ get_options (int argc, char **argv)
 	{
 	  strncpy (rc_file, argv[++i], sizeof (rc_file) - 1);
 	}
-#ifdef GUILE_FLAG
+
       else if ((strcmp (argv[i], "-fg") == 0
 		|| strcmp (argv[i], "--guile-file") == 0) && i + 1 < argc)
 	{
 	  strncpy (rc_guile_file, argv[++i], sizeof (rc_guile_file) - 1);
 	}
-#endif
+
       else if (strcmp (argv[i], "-p") == 0 || strcmp (argv[i], "--poll-rc") == 0)
 	{
 	  poll_rc = 1;
@@ -137,13 +130,13 @@ get_options (int argc, char **argv)
 	{
 	  show_defaults_rc ();
 	}
-#ifdef GUILE_FLAG
+
       else if (strcmp (argv[i], "-dg") == 0
 	       || strcmp (argv[i], "--defaults-guile") == 0)
 	{
 	  show_defaults_guile_rc ();
 	}
-#endif
+
       else if (strcmp (argv[i], "-h") == 0 || strcmp (argv[i], "--help") == 0)
 	{
 	  show_help ();
@@ -182,7 +175,7 @@ get_options (int argc, char **argv)
 	}
     }
 
-#ifdef GUILE_FLAG
+
   if (strcmp (rc_guile_file, "") == 0)
     {
       home = getenv ("HOME");
@@ -193,7 +186,7 @@ get_options (int argc, char **argv)
 	  strncat (rc_guile_file, "/.xbindkeysrc.scm", sizeof (rc_guile_file));
 	}
     }
-#endif
+
 }
 
 void
@@ -203,9 +196,9 @@ show_options (void)
     {
       printf ("displayName = %s\n", display_name);
       printf ("rc file = %s\n", rc_file);
-#ifdef GUILE_FLAG
+
       printf ("rc guile file = %s\n", rc_guile_file);
-#endif
+
     }
 }
 
@@ -226,13 +219,13 @@ show_help (void)
 
   fprintf (stderr, "  -V, --version           Print version and exit\n");
   fprintf (stderr, "  -d, --defaults          Print a default rc file\n");
-#ifdef GUILE_FLAG
+
   fprintf (stderr, " -dg, --defaults-guile    Print a default guile configuration file\n");
-#endif
+
   fprintf (stderr, "  -f, --file              Use an alternative rc file\n");
-#ifdef GUILE_FLAG
+
   fprintf (stderr, " -fg, --file-guile        Use an alternative guile configuration file\n");
-#endif
+
   fprintf (stderr, "  -p, --poll-rc           Poll the rc/guile configs for updates\n");
   fprintf (stderr, "  -h, --help              This help!\n");
   fprintf (stderr, "  -X, --display           Set X display to use\n");
@@ -332,7 +325,6 @@ show_defaults_rc (void)
 }
 
 
-#ifdef GUILE_FLAG
 static void
 show_defaults_guile_rc (void)
 {
@@ -506,7 +498,7 @@ show_defaults_guile_rc (void)
 
   exit (1);
 }
-#endif
+
 
 
 
@@ -526,10 +518,9 @@ file_exist (char * filename)
 int
 rc_file_exist (void)
 {
-#ifdef GUILE_FLAG
   if (file_exist (rc_guile_file))
     return 1;
-#endif
+
 
   if (!file_exist (rc_file))
     {
@@ -538,13 +529,13 @@ rc_file_exist (void)
       fprintf (stderr,
 	       "please, create one with 'xbindkeys --defaults > %s'.\n",
 	       rc_file);
-#ifdef GUILE_FLAG
+
       fprintf (stderr,
 	       "or, if you want scheme configuration style,\n");
       fprintf (stderr,
 	       "with 'xbindkeys --defaults-guile > %s'.\n",
 	       rc_guile_file);
-#endif
+
       return 0;
     }
 
@@ -825,7 +816,7 @@ get_rc_file (void)
 
 
 //Everything from here on out has been changed by MMH
-#ifdef GUILE_FLAG
+
 int
 init_xbk_guile_fns (void)
 {
@@ -1146,4 +1137,3 @@ SCM debug_info_wrapper (void)
   return SCM_UNSPECIFIED;
 }
 
-#endif
