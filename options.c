@@ -30,8 +30,6 @@
 
 char *display_name = NULL;
 
-char rc_file[512];
-
 char rc_guile_file[512];
 
 int verbose = 0;
@@ -46,7 +44,6 @@ char *geom = NULL;
 
 static void show_version (void);
 static void show_help (void);
-static void show_defaults_rc (void);
 
 static void show_defaults_guile_rc (void);
 int init_xbk_guile_fns (void);
@@ -125,12 +122,6 @@ get_options (int argc, char **argv)
 	  verbose = 1;
 	  have_to_start_as_daemon = 0;
 	}
-      else if (strcmp (argv[i], "-d") == 0
-	       || strcmp (argv[i], "--defaults") == 0)
-	{
-	  show_defaults_rc ();
-	}
-
       else if (strcmp (argv[i], "-dg") == 0
 	       || strcmp (argv[i], "--defaults-guile") == 0)
 	{
