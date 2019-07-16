@@ -65,8 +65,6 @@ get_options (int argc, char **argv)
   int i;
   char *home;
 
-  strncpy (rc_file, "", sizeof(rc_file));
-
   strncpy (rc_guile_file, "", sizeof (rc_guile_file));
 
   verbose = 0;
@@ -87,18 +85,11 @@ get_options (int argc, char **argv)
 	{
 	  display_name = argv[++i];
 	}
-      else if ((strcmp (argv[i], "-f") == 0
-		|| strcmp (argv[i], "--file") == 0) && i + 1 < argc)
-	{
-	  strncpy (rc_file, argv[++i], sizeof (rc_file) - 1);
-	}
-
       else if ((strcmp (argv[i], "-fg") == 0
 		|| strcmp (argv[i], "--guile-file") == 0) && i + 1 < argc)
 	{
 	  strncpy (rc_guile_file, argv[++i], sizeof (rc_guile_file) - 1);
 	}
-
       else if (strcmp (argv[i], "-p") == 0 || strcmp (argv[i], "--poll-rc") == 0)
 	{
 	  poll_rc = 1;
@@ -410,23 +401,14 @@ int
 rc_file_exist (void)
 {
   if (file_exist (rc_guile_file))
-    return 1;
-
-
-  if (!file_exist (rc_file))
     {
+    return 1;
+    } else {
       fprintf (stderr, "Error : %s not found or reading not allowed.\n",
-	       rc_file);
-      fprintf (stderr,
-	       "please, create one with 'xbindkeys --defaults > %s'.\n",
-	       rc_file);
-
-      fprintf (stderr,
-	       "or, if you want scheme configuration style,\n");
-      fprintf (stderr,
-	       "with 'xbindkeys --defaults-guile > %s'.\n",
 	       rc_guile_file);
-
+      fprintf (stderr,
+	       "please, create one with 'xbindkeys --defaults-guile > %s'.\n",
+	       rc_guile_file);
       return 0;
     }
 
