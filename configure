@@ -629,6 +629,8 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
 GUILE_FLAG
+GUILE_FALSE
+GUILE_TRUE
 GUILE_LDFLAGS
 GUILE_CFLAGS
 GUILE_LTLIBS
@@ -744,6 +746,7 @@ enable_dependency_tracking
 with_x
 enable_fork
 enable_tk
+enable_guile
 with_gnu_ld
 enable_rpath
 '
@@ -1385,6 +1388,7 @@ Optional Features:
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-fork       No fork+exec to launch program (Use a system call instead)
   --disable-tk    Do not install xbindkeys_show (prevent tk dependency)
+  --disable-guile       Disable scheme/guile configuration file style
   --disable-rpath         do not hardcode runtime library paths
 
 Optional Packages:
@@ -5055,66 +5059,18 @@ fi
 
 
 
+use_guile=yes
 
-LIBS_saved="$LIBS"
-LIBS=
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for XCreateWindow in -lguile" >&5
-$as_echo_n "checking for XCreateWindow in -lguile... " >&6; }
-if ${ac_cv_lib_guile_XCreateWindow+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lguile $LIBS_saved $X_LIBS $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char XCreateWindow ();
-int
-main ()
-{
-return XCreateWindow ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_guile_XCreateWindow=yes
-else
-  ac_cv_lib_guile_XCreateWindow=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_guile_XCreateWindow" >&5
-$as_echo "$ac_cv_lib_guile_XCreateWindow" >&6; }
-if test "x$ac_cv_lib_guile_XCreateWindow" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBGUILE 1
-_ACEOF
-
-  LIBS="-lguile $LIBS"
-
-else
-
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Xbindkeys depends on guile!" >&5
-$as_echo "$as_me: WARNING: Xbindkeys depends on guile!" >&2;}
-
+# Check whether --enable-guile was given.
+if test "${enable_guile+set}" = set; then :
+  enableval=$enable_guile; use_guile="${enableval}"
 fi
 
-X_LIBS="$X_LIBS $LIBS"
-LIBS="$LIBS_saved"
 
+GUILE_FLAG=""
 
-
-
-# Extract the first word of "guile", so it can be a program name with args.
+if test "$use_guile" = yes; then
+   # Extract the first word of "guile", so it can be a program name with args.
 set dummy guile; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
@@ -5666,7 +5622,16 @@ $as_echo "$GUILE_LDFLAGS" >&6; }
 
 
 
-GUILE_FLAG="-DGUILE_FLAG=1"
+   GUILE_FLAG="-DGUILE_FLAG=1"
+fi
+
+ if test x$use_guile = xyes; then
+  GUILE_TRUE=
+  GUILE_FALSE='#'
+else
+  GUILE_TRUE='#'
+  GUILE_FALSE=
+fi
 
 
 
@@ -6145,6 +6110,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${TK_TRUE}" && test -z "${TK_FALSE}"; then
   as_fn_error $? "conditional \"TK\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${GUILE_TRUE}" && test -z "${GUILE_FALSE}"; then
+  as_fn_error $? "conditional \"GUILE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

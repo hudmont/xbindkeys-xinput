@@ -62,26 +62,20 @@ AM_CONDITIONAL(TK, test x$use_tk = xyes)
 
 
 dnl disable guile config file
+use_guile=yes
 
-LIBS_saved="$LIBS"
-LIBS=
-AC_CHECK_LIB(guile, XCreateWindow,, [
-        AC_MSG_WARN([Xbindkeys depends on guile!])
-], $LIBS_saved $X_LIBS)
-X_LIBS="$X_LIBS $LIBS"
-LIBS="$LIBS_saved"
+AC_ARG_ENABLE( guile,
+[  --disable-guile       Disable scheme/guile configuration file style ],
+   use_guile="${enableval}")
 
+GUILE_FLAG=""
 
-dnl use_guile=yes
+if test "$use_guile" = yes; then
+   GUILE_FLAGS
+   GUILE_FLAG="-DGUILE_FLAG=1"
+fi
 
-dnl AC_ARG_ENABLE( guile,
-dnl  [  --disable-guile       Disable scheme/guile configuration file style ],
-dnl    use_guile="${enableval}")
-
-dnl GUILE_FLAGS
-GUILE_FLAG="-DGUILE_FLAG=1"
-
-dnl AM_CONDITIONAL(GUILE, test x$use_guile = xyes)
+AM_CONDITIONAL(GUILE, test x$use_guile = xyes)
 
 AC_SUBST(GUILE_FLAG)
 
