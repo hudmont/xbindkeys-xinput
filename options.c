@@ -26,6 +26,11 @@
 #include "keys.h"
 #include "grab_key.h"
 
+
+#include <getopt.h>
+
+
+
 #include <libguile.h>
 
 char *display_name = NULL;
@@ -62,7 +67,7 @@ SCM debug_info_wrapper (void);
 void
 get_options (int argc, char **argv)
 {
-  int i;
+  char c;
   char *home;
 
   strncpy (rc_guile_file, "", sizeof (rc_guile_file));
@@ -71,81 +76,77 @@ get_options (int argc, char **argv)
   have_to_show_binding = 0;
   have_to_get_binding = 0;
   have_to_start_as_daemon = 1;
+  
+  static struct option long_options[] =
+        { {"version",        no_argument, 0, 'V'},
+	  {"print-defaults", no_argument, 0, 'd'},
+	  {"help",           no_argument, 0, 'h'},
+          {"display",  required_argument, 0, 'X'},
+          {"file",     required_argument, 0, 'f'},
+	  {"geometry",     required_argument, 0, 'g'},
 
-
-  for (i = 1; i < argc; i++)
+	  {"verbose",        no_argument, &verbose, 1},
+          {"poll_rc",        no_argument, &poll_rc, 1},
+	  {"show",           no_argument, &have_to_show_binding, 1},
+	  {"key",            no_argument, &have_to_get_binding , 1},
+	  {"multikey",       no_argument, &have_to_get_binding , 2},
+	  {"nodaemon",       no_argument, &have_to_start_as_daemon, 0},
+	  {"detectable-ar",  no_argument, &detectable_ar, 1},
+          {0, 0, 0, 0} };
+  int option_index = 0;
+  
+  while((c = getopt_long(argc, argv,"VdhXfgvpskmnD" , long_options, &option_index)) != -1)
     {
-      if (strcmp (argv[i], "-V") == 0 || strcmp (argv[i], "--version") == 0)
-	{
-	  show_version ();
-	  exit (1);
-	}
-      else if ((strcmp (argv[i], "-X") == 0
-		|| strcmp (argv[i], "--display") == 0) && i + 1 < argc)
-	{
-	  display_name = argv[++i];
-	}
-      else if ((strcmp (argv[i], "-fg") == 0
-		|| strcmp (argv[i], "--guile-file") == 0) && i + 1 < argc)
-	{
-	  strncpy (rc_guile_file, argv[++i], sizeof (rc_guile_file) - 1);
-	}
-      else if (strcmp (argv[i], "-p") == 0 || strcmp (argv[i], "--poll-rc") == 0)
-	{
-	  poll_rc = 1;
-	}
-      else if (strcmp (argv[i], "-s") == 0 || strcmp (argv[i], "--show") == 0)
-	{
-	  have_to_show_binding = 1;
-	}
-      else if (strcmp (argv[i], "-k") == 0 || strcmp (argv[i], "--key") == 0)
-	{
-	  have_to_get_binding = 1;
-	}
-      else if (strcmp (argv[i], "-mk") == 0
-	       || strcmp (argv[i], "--multikey") == 0)
-	{
-	  have_to_get_binding = 2;
-	}
-      else if (strcmp (argv[i], "-v") == 0
-	       || strcmp (argv[i], "--verbose") == 0)
-	{
-	  verbose = 1;
-	  have_to_start_as_daemon = 0;
-	}
-      else if (strcmp (argv[i], "-dg") == 0
-	       || strcmp (argv[i], "--defaults-guile") == 0)
-	{
-	  show_defaults_guile_rc ();
-	}
-
-      else if (strcmp (argv[i], "-h") == 0 || strcmp (argv[i], "--help") == 0)
-	{
-	  show_help ();
-	  exit (1);
-	}
-      else if ((strcmp (argv[i], "-g") == 0
-		|| strcmp (argv[i], "--geometry") == 0) && i + 1 < argc)
-	{
-	  geom = argv[++i];
-	}
-      else if (strcmp (argv[i], "-n") == 0
-	       || strcmp (argv[i], "--nodaemon") == 0)
-	{
-	  have_to_start_as_daemon = 0;
-	}
-      else if (strcmp (argv[i], "-sd") == 0
-	       || strcmp (argv[i], "--detectable-ar") == 0)
-	{
-	  detectable_ar = 1;
-	}
-      else
-	{
-	  show_help ();
-	  exit (1);
-	}
-    }
-
+    switch(c)
+      {
+      case 'V':
+	show_version ();
+	exit (1);
+      case 'd':
+	show_defaults_guile_rc ();
+	break;
+      case 'X':
+	display_name = optarg;
+	break;
+      case 'f':
+	strncpy (rc_guile_file, optarg, sizeof (rc_guile_file) - 1);
+	break;
+      case 'g':
+	geom = optarg;
+	break;
+	// small Duff's device
+      case 0:
+	if(option_index == 6)
+	  {
+	  case 'v':
+	    have_to_start_as_daemon = 0;
+	  }
+	break;
+      case 'p':
+	poll_rc=1;
+	break;
+      case 's':
+	have_to_show_binding=1;
+	break;
+      case 'k':
+	have_to_get_binding=1;
+	break;
+      case 'm':
+	have_to_get_binding=2;
+	break;
+      case 'n':
+	have_to_start_as_daemon=0;
+	break;
+      case 'D':
+        detectable_ar=1;
+	break;
+      case 'h':
+      default:
+	show_help();
+	exit(1);
+      }
+  }
+    
   if (strcmp (rc_guile_file, "") == 0)
     {
       home = getenv ("HOME");
@@ -175,7 +176,7 @@ show_options (void)
 static void
 show_version (void)
 {
-  fprintf (stderr, "xbindkeys %s by Philippe Brochard\n", PACKAGE_VERSION);
+  fprintf (stderr, "xbindkeys %s by Philippe Brochard & @Hudmont\n", PACKAGE_VERSION);
 }
 
 static void
@@ -188,11 +189,9 @@ show_help (void)
 
   fprintf (stderr, "  -V, --version           Print version and exit\n");
 
-  fprintf (stderr, " -dg, --defaults-guile    Print a default guile configuration file\n");
+  fprintf (stderr, " -d, --print-defaults    Print a default guile configuration file\n");
 
   fprintf (stderr, "  -f, --file              Use an alternative rc file\n");
-
-  fprintf (stderr, " -fg, --file-guile        Use an alternative guile configuration file\n");
 
   fprintf (stderr, "  -p, --poll-rc           Poll the rc/guile configs for updates\n");
   fprintf (stderr, "  -h, --help              This help!\n");
@@ -201,7 +200,7 @@ show_help (void)
 	   "  -v, --verbose           More information on xbindkeys when it run\n");
   fprintf (stderr, "  -s, --show              Show the actual keybinding\n");
   fprintf (stderr, "  -k, --key               Identify one key pressed\n");
-  fprintf (stderr, " -mk, --multikey          Identify multi key pressed\n");
+  fprintf (stderr, " -m, --multikey          Identify multi key pressed\n");
   fprintf (stderr,
 	   "  -g, --geometry          size and position of window open with -k|-mk option\n");
   fprintf (stderr, "  -n, --nodaemon          don't start as daemon\n");
