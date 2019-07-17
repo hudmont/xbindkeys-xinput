@@ -25,31 +25,28 @@ Additional requirements to compile from source:
   make install
 
 
-# OVERVIEW
-The configuration of specific clients is taken care of in the file called 
-"$HOME/.xbindkeysrc"
+# Configuration
+The configuration is taken care of in the file called 
+	"$HOME/.xbindkeysrc.scm"
 
 You can have a default file with the --defaults option:
 
-  xbindkeys --defaults
+	xbindkeys --defaults
 
 The semicolon(;) symbol may be used anywhere for comments. 
 
-(xbindkey '(modifier modifier key) "Command to start &")
+	(xbindkey '(modifier modifier key) "Command to start &")
 
 Where modifier are:
 
-	Control, Shift, Alt or Mod1, Mod2 (numlock), Mod3, Mod4, Mod5
-
-	(modifiers are not case sensitive).
+Control, Shift, Alt or Mod1, Mod2 (numlock), Mod3, Mod4, Mod5 (modifiers are not case sensitive).
 
 By defaults, xbindkeys does not pay attention with the modifiers
 NumLock, CapsLock and ScrollLock.
 Add the lines above in the config file, if you want to pay attention to them.
-
-	keystate_numlock = enable
-	keystate_capslock = enable
-	keystate_scrolllock= enable
+	(set-numlock! #t)
+	(set-scrolllock! #t)
+	(set-capslock! #t)
 
 
 Use 'xev' or 'xbindkeys --key' or 'xbindkeys --multikey' to know modifier 
