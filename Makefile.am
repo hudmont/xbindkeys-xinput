@@ -13,8 +13,8 @@ xbindkeys_SOURCES=xbindkeys.c xbindkeys.h \
 
 xbindkeys_DEPENDENCIES=xbindkeys.o keys.o options.o get_key.o grab_key.o
 
-EXTRA_DIST=BUGS xbindkeys.1 \
-	TODO xbindkeysrc  xbindkeys.spec \
+EXTRA_DIST=xbindkeys.1 \
+	xbindkeysrc  xbindkeys.spec \
 	xbindkeysrc.scm xbindkeysrc-combo.scm \
 	xbindkeys_show.1 xbindkeys_show
 
