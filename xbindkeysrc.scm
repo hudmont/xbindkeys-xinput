@@ -81,7 +81,7 @@
 ;;(xbindkey '(release control shift a) "rxvt")
 
 ;; Control + mouse button 2 release event starts rxvt
-;;(xbindkey '(releace control "b:2") "rxvt")
+;;(xbindkey '(release control "b:2") "rxvt")
 
 
 ;; Extra features
