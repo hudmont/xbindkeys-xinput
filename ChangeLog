@@ -1,3 +1,7 @@
+2019-07-17  Zsombor Barna <unibro@mailo.com>
+	* options.c: Removed support of old rc configuration scheme
+	* options.c: Rewrote option parsing to use getopt
+	* xbindkeys.c: Removed support of old rc configuration scheme
 2011-03-09  Hans-Peter Deifel <hpdeifel@gmx.de>
 
 	* options.c: Replace some deprecated guile functions.
