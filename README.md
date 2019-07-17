@@ -79,63 +79,63 @@ source code just to achieve these compilcated configuration. All can be done wit
 
 Use the -h or --help option for all available options.
 
-  -f
-  --file
+	-f
+	--file
                 use an alternative xbindkeysrc.scm (default is $HOME/.xbindkeysrc.scm)
 
-  -h
---help
+	-h
+	--help
                 help for xbindkeys.
 
-  -v
-  --verbose
+	-v
+	--verbose
                 Verbose mode. Print more information when
                 the program is running.
          
-  -X <display>
-  --display <display>
+	-X <display>
+	--display <display>
                 use XServer at a specified display in standard X form.
                 using this mode allows for multiple displays.
 
-  -d
-  --defaults
+	-d
+	--defaults
                 Show a default configuration file. You can use it to create the file
                 $HOME/.xbindkeysrc.scm like this:
 
                       xbindkeys --defaults > $HOME/.xbindkeysrc.scm
 
-  -k
-  --key
-                Identify key pressed. This option is usefull to fill
+	-k
+	--key
+              Identify key pressed. This option is usefull to fill
                 $HOME/.xbindkeysrc. You have just to press a key to
                 know what to put in the config file.
 
-  -m
-  --multikey
+	-m
+	--multikey
                 Identify key pressed like with --key option, but you can 
 		press modifier and key, and you can make multi tries.
 		You have just to press a key to know what to put in the 
 		config file.
 
-  -g
-  --geometry
+	-g
+	--geometry
                 Set size and position of the window open with the 
 		--key / --multikey options.
 
-  -n
-  --nodaemon
+	-n
+	--nodaemon
                 Don't start as daemon. By default, xbindkeys starts in
                 background, this option prevents this feature.
 
 # Usage
 
-  xbindkeys
+	xbindkeys
 
 If you want, you can start it automatically with X or your preferred desktop environment.
 
 For example, edit your .xsession or .XClients or .xinitrc (if any) and add a line like this:
 
-  xbindkeys
+	xbindkeys
 
 # Current known bugs and improvements, will make issues out of them later
 
