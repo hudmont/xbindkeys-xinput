@@ -75,7 +75,7 @@ source code just to achieve these compilcated configuration. All can be done wit
 
 [For more details, please see here](http://www.gnu.org/software/guile/guile.html)
 
-#CLI Options
+# CLI Options
 
 Use the -h or --help option for all available options.
 
