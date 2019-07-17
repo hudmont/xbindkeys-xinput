@@ -14,10 +14,10 @@ in X and starts associated shell commands.
 Available command line options are as follows:
 .TP
 \fB-d, --defaults\fP
-Print a default rc file
+Print a default configuration file
 .TP
 \fB-f, --file\fP
-Use an alternative rc file
+Use an alternative configuration file
 .TP
 \fB-h, --help\fP
 Short help on options plus version/author info.
@@ -33,26 +33,16 @@ More information on xbindkeys when it runs
 Identify one key pressed (useful for configuration)
 
 .TP
-\fB-mk, --multikey\fP
+\fB-m, --multikey\fP
 Identify multi key pressed (useful for configuration)
 
 .TP
 \fB-g, --geometry\fP
-size and position of window with -k|-mk option
+size and position of window with -k|-m option
 
 .TP
 \fB-n, --nodaemon\fP
 don't start as daemon
-
-.LP
-If guile support has not been disabled:
-.TP
-\fB-dg, --defaults-guile\fP
-Print a default guile configuration file
-
-.TP
-\fB-fg, --file-guile\fP
-Use an alternative guile configuration file
 
 .SH "XBINDKEYSRC"
 XBindKeys default configuration file is at $HOME/.xbindkeysrc,
@@ -61,7 +51,7 @@ used only for one user.
 The configuration file consists of commands in double quotes,
 and associated keys in the next line.
 .LP
-Comments are started with a pound (#) and extend to the end of the line.
+Comments are started with a semicolon (;) and extend to the end of the line.
 .LP
 You can see a default configuration with --defaults
 .LP

@@ -1,6 +1,7 @@
 
 
 # Overview
+
 This is a fork of Philippe Brochard's [xbindkeys](http://www.nongnu.org/xbindkeys/xbindkeys.html).
 With this program, you can create your own shortcuts on X11-based graphical environments.
 
@@ -17,11 +18,7 @@ Additional requirements to compile from source:
 
 # Installation
 
-  configure --help
-  configure (and any options you want to set)
   make
-  make install
-
 
 # Configuration
 The configuration is taken care of in the file called 
