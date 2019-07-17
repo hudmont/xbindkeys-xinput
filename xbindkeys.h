@@ -19,7 +19,7 @@
 #define __XBINDKEYS_H
 
 #include <X11/Xlib.h>
-#include "config.h"
+//#include "config.h"
 
 extern void end_it_all (Display *);
 extern Display *current_display;

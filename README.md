@@ -13,7 +13,6 @@ With this program, you can create your own shortcuts on X11-based graphical envi
 Additional requirements to compile from source:
     
 - The X11 include files and libraries. (Not the X server development packages)
-- GNU Autotools
 - GNU Make
 
 # Installation
