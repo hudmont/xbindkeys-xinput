@@ -2,7 +2,6 @@
 
 # Overview
 This is a fork of Philippe Brochard's [xbindkeys](http://www.nongnu.org/xbindkeys/xbindkeys.html).
-See other contributors in that xbindkeys' AUTHORS file.
 With this program, you can create your own shortcuts on X11-based graphical environments.
 
 # Requirements
@@ -154,3 +153,5 @@ For example, edit your .xsession or .XClients or .xinitrc (if any) and add a lin
 
 # Contact Info
 [Zsombor Barna](mailto:unibro@mailo.com)
+
+See other contributors in the original xbindkeys' AUTHORS file.
