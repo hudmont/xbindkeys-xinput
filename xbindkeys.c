@@ -138,7 +138,7 @@ inner_main (int argc, char **argv)
   end_it_all (d);
 
 
-  return (0);			/* not reached... */
+  //return (0);			/* not reached... */
 
 }
 
@@ -428,7 +428,7 @@ null_X_error (Display * d, XErrorEvent * e)
 /*   end_it_all (d); */
 
 /*   exit (-1); */
-
+  //d=d; e=e; // to avoid warnings
   return (NULL);
 }
 
@@ -470,6 +470,7 @@ static void
 catch_HUP_signal (int sig)
 {
   reload_rc_file ();
+  //sig=sig; // to avoid warnings
 }
 
 
@@ -485,6 +486,7 @@ catch_CHLD_signal (int sig)
       if (verbose)
 	printf ("Catch CHLD signal -> pid %i terminated\n", child);
     }
+  //sig=sig; // to avoid warnings
 }
 
 

@@ -1,5 +1,6 @@
 CC=gcc
-CFLAGS=-g -Wall -Wextra `pkg-config --cflags xi x11 guile-2.0`
+
+CFLAGS=-g -Wall -Wextra `pkg-config --cflags xi x11 guile-2.0` -DPACKAGE_VERSION=\"2.0beta\"
 #CXXFLAGS=$CFLAGS
 SRCS=$(wildcard *.c)
 OBJS = $(SRCS:.c=.o)

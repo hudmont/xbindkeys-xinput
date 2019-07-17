@@ -93,6 +93,7 @@ set_sizehints (Display * dpy, XSizeHints * hintp, int min_width,
       hintp->y = DisplayHeight (dpy, DefaultScreen (dpy)) + hintp->y -
 	hintp->height;
     }
+  //defx=defx; defy=defy; // to avoid known warnings
 }
 
 

@@ -25,7 +25,7 @@
 #include <X11/keysym.h>
 #include "xbindkeys.h"
 #include "keys.h"
-#include "config.h"
+//#include "config.h"
 #include "options.h"
 #include "grab_key.h"
 
