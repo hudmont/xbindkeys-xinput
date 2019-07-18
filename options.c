@@ -45,6 +45,8 @@ SCM ungrab_all_keys_wrapper (Display *);
 SCM remove_all_keys_wrapper (void);
 SCM debug_info_wrapper (void);
 
+// data struct and bindings for closures in libffi
+
 struct grab_params {
   Display *d;
   int verbose;
@@ -71,7 +73,10 @@ void ungrab_binding(ffi_cif *cif, void *ret, void*  args[],
   args=args;
   #endif
   }
-
+// We need the closures and their data to be static so they don't
+// expire and cause segfaults
+// The closures are needed to remove the pain of having
+// a lot of globals
 static struct grab_params P;
 static ffi_cif cif;
 static ffi_type *args[0];
@@ -90,7 +95,7 @@ init_xbk_guile_fns (Display *d, int verbose)
   P.verbose=verbose;
 
 
-  
+  // adapted from the examples provided in the docs of libffi 
   grab_closure   = ffi_closure_alloc(sizeof(ffi_closure), &bound_grab);
   ungrab_closure = ffi_closure_alloc(sizeof(ffi_closure), &bound_ungrab);
   
@@ -130,7 +135,6 @@ init_xbk_guile_fns (Display *d, int verbose)
   scm_c_define_gsubr("ungrab-all-keys", 0, 0, 0, bound_ungrab);
     
   scm_c_define_gsubr("remove-all-keys", 0, 0, 0, remove_all_keys_wrapper);
-  
   scm_c_define_gsubr("debug", 0, 0, 0, debug_info_wrapper);
   return 0;
 }
