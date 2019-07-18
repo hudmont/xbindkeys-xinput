@@ -82,10 +82,10 @@ catch_CHLD_signal (int sig)
 int
 main (const int argc, const char** argv)
 {
-  
+
   //guile shouldn't steal our arguments! we already parse them!
   //so we put them in temporary variables.
-  got_HUP=0;  
+  got_HUP=0;
   char c;
   char *home;
 
@@ -107,47 +107,47 @@ main (const int argc, const char** argv)
   char *display_name=NULL;
   char *geom=NULL;
   Display *d;
-  
+
   struct poptOption optionsTable[] =
     {     {"version",  'V',  0, NULL, 'V',
 	   "prints version and exit", NULL},
-	  
-          {"display",  'X', POPT_ARG_STRING, display_name,  0,
+
+          {"display",  'X', POPT_ARG_STRING, &display_name,  0,
 	   "Set X display to use", NULL},
-	  
+
           {"file",     'f', POPT_ARG_STRING, &rc_guile_file, 0,
 	   "Use an alternative rc file", NULL},
-	  
+
 	  {"geometry", 'g', POPT_ARG_STRING, &geom, 0,
 	   "size and position of window open with -k or-m option", NULL},
 
 	  {"verbose",  'v',  0, &verbose, 'v',
 	   "be verbose for debugging purposes", NULL},
-	  
+
           {"poll_rc",  'p',  0, &poll_rc, 0,
 	   "Poll the config for updates", NULL},
-	  
+
 	  {"show",     's',  0, &have_to_show_binding, 0,
 	   "Show the actual keybindings", NULL},
-	  
+
 	  {"key",      'k',  0, &have_to_get_binding , 0,
 	   "Identify one keypress", NULL},
 
 	  {"multikey", 'm',   0 , NULL , 'm',
 	   "Identify multiple keypresses", NULL},
-	  
+
 	  {"nodaemon", 'n',  0, NULL, 'n',
 	   "don't start as daemon", NULL},
-	  
+
 	  {"detectable-ar", 'a', 0, &detectable_ar, 'a', 
 	   "something something autorepeat", NULL},
-	  
+
 	  POPT_AUTOHELP
           {NULL, 0, 0,NULL, 0, NULL, NULL} };
 
   poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
-  poptSetOtherOptionHelp(optCon, "[OPTIONS]* <port>");
-    
+  poptSetOtherOptionHelp(optCon, "[OPTIONS]*");
+
   while((c = poptGetNextOpt(optCon))>= 0)
     {
     switch(c)
