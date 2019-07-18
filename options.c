@@ -38,11 +38,10 @@ char *display_name = NULL;
 //char rc_guile_file[512];
 
 int verbose = 0;
-int poll_rc = 0;
+
 int have_to_show_binding = 0;
-int have_to_get_binding = 0;
-int have_to_start_as_daemon = 1;
-int detectable_ar = 0;
+
+
 
 char *geom = NULL;
 

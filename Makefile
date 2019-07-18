@@ -1,13 +1,13 @@
 CC=gcc
-
-CFLAGS=-g -Wall -Wextra `pkg-config --cflags xi x11 guile-2.0` -DPACKAGE_VERSION=\"2.0beta\"
+#LIBS=xi x11 guile-2.0 popt
+CFLAGS=-g -Wall -Wextra `pkg-config --cflags xi x11 guile-2.0 popt` -DPACKAGE_VERSION=\"2.0beta\"
 #CXXFLAGS=$CFLAGS
 SRCS=$(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 #DEPS = $(OBJS:.o=.d)  # one dependency file for each source
 
 # $(LDFLAGS)
-LDFLAGS=`pkg-config --libs xi x11 guile-2.0`
+LDFLAGS=`pkg-config --libs xi x11 guile-2.0 popt`
 
 #-include $(DEPS)   # include all dep files in the makefile
 

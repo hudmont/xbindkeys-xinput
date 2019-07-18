@@ -99,7 +99,8 @@ set_sizehints (Display * dpy, XSizeHints * hintp, int min_width,
 
 
 void
-get_key_binding (Display * dpy, char **argv, int argc)
+get_key_binding (Display * dpy, int have_to_get_binding)
+		 //char **argv, int argc)
 {
   XSizeHints hints;
   int borderwidth = 2;
@@ -134,7 +135,8 @@ get_key_binding (Display * dpy, char **argv, int argc)
 		     hints.width, hints.height, borderwidth, 0,
 		     InputOutput, (Visual *) CopyFromParent, mask, &attr);
 
-  XSetStandardProperties (dpy, w, name, NULL, (Pixmap) 0, argv, argc, &hints);
+  //XSetStandardProperties (dpy, w, name, NULL, (Pixmap) 0, argv, argc, &hints);
+  XSetStandardProperties (dpy, w, name, NULL, (Pixmap) 0, (char **)NULL, 0, &hints);
 
   XMapWindow (dpy, w);
 
