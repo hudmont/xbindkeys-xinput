@@ -84,7 +84,7 @@ main (const int argc, const char** argv)
           {"display",  'X', POPT_ARG_STRING, display_name,  0,
 	   "Set X display to use", NULL},
 	  
-          {"file",     'f', POPT_ARG_STRING, rc_guile_file, 0,
+          {"file",     'f', POPT_ARG_STRING, &rc_guile_file, 0,
 	   "Use an alternative rc file", NULL},
 	  
 	  {"geometry", 'g', POPT_ARG_STRING, &geom, 0,
