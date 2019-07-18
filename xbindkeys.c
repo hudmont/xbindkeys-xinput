@@ -57,6 +57,58 @@ extern int poll_rc;
 
 #define SLEEP_TIME 100
 
+#define EQ_button (e.xbutton.button == keys[i].key.button)
+#define EQ_key (e.xkey.keycode == XKeysymToKeycode (d, keys[i].key.sym)
+
+#define PLACEHOLDER_NAME(TYPE, CAPITALIZED_TYPE_NAME, EVENT_TYPE)		\
+if (keys[i].type == CAPITALIZED_TYPE && keys[i].event_type == EVENT_TYPE)	\
+		{								\
+		  if (EQ_##TYPE							\
+		      && e.x##TYPE.state == keys[i].modifier)			\
+		    {								\
+		     handle(d, &e);						\
+		    } 								\
+		}
+
+#define keyMask ~(numlock_mask | capslock_mask | scrolllock_mask)
+#define buttonMask 0x1FFF & ~(numlock_mask | capslock_mask | scrolllock_mask	\
+			       | Button1Mask | Button2Mask | Button3Mask	\
+			       | Button4Mask | Button5Mask)
+			       
+#define inner_loop_button PLACEHOLDER_NAME(TYPE, BUTTON, EVENT_TYPE)
+#define inner_loop_key(TYPE, CAPITALIZED_TYPE, EVENT_TYPE)			\
+	      PLACEHOLDER_NAME(TYPE, SYM, EVENT_TYPE)				\
+	      else								\
+	      PLACEHOLDER_NAME(TYPE, CODE, EVENT_TYPE)
+
+#define buttonPrint printf("e.xbutton.button=%d\n", e.xbutton.button)
+#define keyPrint printf ("e.xkey.keycode=%d\n", e.xkey.keycode)
+
+#define EVENT_HANDLE(TYPE, EVENT_TYPE)						\
+ if (verbose)									\
+	    {									\
+	      printf (#TYPE #EVENT_TYPE "!\n");					\
+	      TYPE##Print;							\
+	      printf ("e.x" #TYPE ".state=%d\n", e.x##TYPE.state);		\
+	    } 	     			      					\
+										\
+	  e.x##TYPE.state &= TYPE##Mask;					\
+			       	 	       					\
+	  for (i = 0; i < nb_keys; i++)						\
+	    { 	      	  	   						\
+	      inner_loop_##TYPE(TYPE, CAPITALIZED_TYPE, EVENT_TYPE);		\
+	    } 									
+
+void handle(Display *d, XEvent *e)
+{
+	print_key (d, &keys[i]);
+	adjust_display(&e.xany);
+	start_command_key (&keys[i]);			
+}
+
+
+
+
 
 int argc_t; char** argv_t;
 void
