@@ -22,10 +22,6 @@
 #include <X11/Xutil.h>
 #include <unistd.h>
 #include "keys.h"
-#include "xbindkeys.h"
-//#include "options.h"
-
-
 
 #define STOP_KEY "q"
 
@@ -49,7 +45,7 @@
 void
 set_sizehints (Display * dpy, XSizeHints * hintp, int min_width,
 	       int min_height, int defwidth, int defheight, int defx,
-	       int defy)
+	       int defy, char *geom)
 {
   int geom_result;
 
@@ -100,7 +96,7 @@ set_sizehints (Display * dpy, XSizeHints * hintp, int min_width,
 }
 
 void
-get_key_binding (Display * dpy, int have_to_get_binding)
+get_key_binding (Display * dpy, int have_to_get_binding, char *geom)
 		 //char **argv, int argc)
 {
   XSizeHints hints;
@@ -126,7 +122,7 @@ get_key_binding (Display * dpy, int have_to_get_binding)
 
   set_sizehints (dpy, &hints, OUTER_WINDOW_MIN_WIDTH, OUTER_WINDOW_MIN_HEIGHT,
 		 OUTER_WINDOW_DEF_WIDTH, OUTER_WINDOW_DEF_HEIGHT,
-		 OUTER_WINDOW_DEF_X, OUTER_WINDOW_DEF_Y);
+		 OUTER_WINDOW_DEF_X, OUTER_WINDOW_DEF_Y, geom);
 
   attr.background_pixel = WhitePixel (dpy, screen);;
   attr.border_pixel = BlackPixel (dpy, screen);;

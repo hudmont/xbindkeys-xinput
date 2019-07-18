@@ -23,10 +23,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <X11/keysym.h>
-#include "xbindkeys.h"
+
 #include "keys.h"
-//#include "config.h"
-#include "options.h"
 #include "grab_key.h"
 
 
@@ -34,8 +32,6 @@
 
 int nb_keys;
 Keys_t *keys;
-
-//extern char rc_guile_file[512];
 
 static char *modifier_string[] = { "Control", "Shift", "Alt", "Mod2",
   "Mod3", "Mod4", "Mod5"

@@ -11,6 +11,7 @@ With this program, you can create your own shortcuts on X11-based graphical envi
 - Xinput ( if it's a separate package )
 - GNU Guile
 - popt
+- libffi ( guile depends on it but we have it as an explicit dep )
 
 Additional requirements to compile from source:
     

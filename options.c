@@ -20,10 +20,9 @@
 #include <stdlib.h>
 #include <X11/keysym.h>
 #include <ctype.h>
-//#include <X11/Xlib.h>
-
+#include <X11/Xlib.h>
 #include "options.h"
-#include "xbindkeys.h"
+
 #include "keys.h"
 #include "grab_key.h"
 

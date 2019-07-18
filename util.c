@@ -27,7 +27,6 @@
 #include "keys.h"
 #include "options.h"
 #include "grab_key.h"
-#include "xbindkeys.h"
 
 
 #include "util.h"

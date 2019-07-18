@@ -4,14 +4,7 @@
 
 #define SLEEP_TIME 100
 
-//extern void get_options (int argc, char **argv);
-//extern void show_options (void);
-
-//extern int rc_file_exist (void);
-
-//extern int get_rc_file (void);
-
-void end_it_all (Display * d);
+extern void end_it_all (Display * d);
 
 extern int rc_file_exist (char *rc_guile_file);
 

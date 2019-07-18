@@ -27,7 +27,6 @@
 #include <sys/stat.h>
 //#include <fcntl.h>
 
-#include "xbindkeys.h"
 #include "keys.h"
 
 #include "options.h"
@@ -106,6 +105,7 @@ main (const int argc, const char** argv)
   int detectable_ar=0;
   int poll_rc;
   char *display_name=NULL;
+  char *geom=NULL;
   Display *d;
   
   struct poptOption optionsTable[] =
@@ -203,7 +203,7 @@ main (const int argc, const char** argv)
 
   if (have_to_get_binding)
     {
-      get_key_binding (d, have_to_get_binding);
+      get_key_binding (d, have_to_get_binding, geom);
       end_it_all (d);
       exit (0);
     }
