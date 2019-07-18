@@ -19,24 +19,6 @@
 #define __OPTIONS_H
 
 
-//extern void get_options (int argc, char **argv);
-//extern void show_options (void);
-
-//extern int rc_file_exist (void);
-
-//extern int get_rc_file (void);
-
 extern int get_rc_guile_file (char *);
-
-
-
-extern char *display_name;
-
-extern int verbose;
-extern int have_to_show_binding;
-
-extern char *geom;
-
-
 
 #endif /* __OPTIONS_H */

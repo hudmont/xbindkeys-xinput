@@ -22,7 +22,8 @@
 #include <X11/Xutil.h>
 #include <unistd.h>
 #include "keys.h"
-#include "options.h"
+#include "xbindkeys.h"
+//#include "options.h"
 
 
 

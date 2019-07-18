@@ -29,7 +29,7 @@ extern void adjust_display (XAnyEvent * xany);
 extern int null_X_error (Display * d, XErrorEvent * e);
 
 
-extern void reload_rc_file (char *rc_guile_file);
+extern void reload_rc_file (Display *d, char *rc_guile_file);
 
 
 extern void catch_HUP_signal (int sig);

@@ -22,10 +22,10 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/wait.h>
+//#include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+//#include <fcntl.h>
 #include "xbindkeys.h"
 #include "keys.h"
 #include "options.h"
@@ -39,17 +39,6 @@
 #include <popt.h>
 #include "util.h"
 
-/*void end_it_all (Display * d);
-
-static Display *start (char *);
-
-static int *null_X_error (Display *, XErrorEvent *);
-static void reload_rc_file (void);
-static void catch_HUP_signal (int sig);
-static void catch_CHLD_signal (int sig);
-static void start_as_daemon (void);*/
-
-static void event_loop (Display *, char *, int);
 static void inner_main (void *, int, char **);
 Display *current_display;  // The current display
 
@@ -69,16 +58,23 @@ main (const int argc, const char** argv)
   
   char c;
   char *home;
-  
-  char rc_guile_file[513];
-  strncpy (rc_guile_file, "", sizeof (rc_guile_file));
 
+  char default_file[513];
+
+  home = getenv ("HOME");
+
+  strncpy (default_file, home, sizeof (default_file) - 21);
+  strncat (default_file, "/.xbindkeysrc.scm", sizeof (default_file)-1);
+
+   // Option definitions
   verbose = 0;
+  char *rc_guile_file = NULL;
   int have_to_show_binding = 0;
   int have_to_get_binding = 0;
   int have_to_start_as_daemon = 1;
   int detectable_ar=0;
   int poll_rc;
+  char *display_name=NULL;
   Display *d;
   
   struct poptOption optionsTable[] =
@@ -139,17 +135,11 @@ main (const int argc, const char** argv)
       }
   }
   // Just to make sure it's 0-terminated
-  rc_guile_file[512]='\0';
+  //rc_guile_file[512]='\0';
   
-  if (strcmp (rc_guile_file, "") == 0)
+  if (rc_guile_file == NULL)
     {
-      home = getenv ("HOME");
-
-      if (rc_guile_file != NULL)
-	{
-	  strncpy (rc_guile_file, home, sizeof (rc_guile_file) - 20);
-	  strncat (rc_guile_file, "/.xbindkeysrc.scm", sizeof (rc_guile_file)-1);
-	}
+      rc_guile_file = default_file;
     }
   
   if (!rc_file_exist (rc_guile_file))
@@ -229,63 +219,42 @@ void init_finalize(Display *d, char *rc_guile_file, int have_to_show_binding)
 void
 inner_main (void *passed_data, int argc, char **argv)
 {
-  struct passed_data *p = (struct passed_data *) passed_data;
-  //Display *d=p->d;
+  struct passed_data *params = (struct passed_data *) passed_data;
+  struct passed_data p = *params;
 
-  //int poll_rc=p->poll_rc;
-  //char *rc_guile_file=p->rc_guile_file;
-  //printf("rc-file-name: %s\n", rc_guile_file);
-  
-
-  init_finalize(p->d, p->rc_guile_file, p->have_to_show_binding);
+  init_finalize(p.d, p.rc_guile_file, p.have_to_show_binding);
 
   if (verbose)
     printf ("starting loop...\n");
-  event_loop (p->d, p->rc_guile_file, p->poll_rc);
+  //event_loop (p.d, p.rc_guile_file, p.poll_rc);
 
-  if (verbose)
-    printf ("ending...\n");
-  end_it_all (p->d);
-  
-  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
-    argc=argc; argv=argv;
-  #else
-    return (0);
-  #endif
-}
-
-
-static void
-event_loop (Display * d, char *rc_guile_file, int poll_rc)
-{
   XEvent e;
-  int i;
 
   time_t rc_guile_file_changed = 0;
   struct stat rc_guile_file_info;
 
   XSetErrorHandler ((XErrorHandler) &null_X_error);
 
-  if (poll_rc)
+  if (p.poll_rc)
     {
 
-      stat (rc_guile_file, &rc_guile_file_info);
+      stat (p.rc_guile_file, &rc_guile_file_info);
       rc_guile_file_changed = rc_guile_file_info.st_mtime;
 
     }
 
   while (True)
     {
-      while(poll_rc && !XPending(d))
+      while(p.poll_rc && !XPending(p.d))
 	{
 
 	  // if the rc guile file has been modified, reload it
-	  stat (rc_guile_file, &rc_guile_file_info);
+	  stat (p.rc_guile_file, &rc_guile_file_info);
 
 
 	  if (rc_guile_file_info.st_mtime != rc_guile_file_changed)
 	    {
-	      reload_rc_file (rc_guile_file);
+	      reload_rc_file (p.d, p.rc_guile_file);
 	      if (verbose)
 		{
 		  printf ("The configuration file has been modified, reload it\n");
@@ -297,7 +266,7 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 	  usleep(SLEEP_TIME*1000);
 	}
 
-      XNextEvent (d, &e);
+      XNextEvent (p.d, &e);
 
       switch (e.type)
 	{
@@ -311,14 +280,14 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 
 	  e.xkey.state &= ~(numlock_mask | capslock_mask | scrolllock_mask);
 
-	  for (i = 0; i < nb_keys; i++)
+	  for (int i = 0; i < nb_keys; i++)
 	    {
 	      if (keys[i].type == SYM && keys[i].event_type == PRESS)
 		{
-		  if (e.xkey.keycode == XKeysymToKeycode (d, keys[i].key.sym)
+		  if (e.xkey.keycode == XKeysymToKeycode (p.d, keys[i].key.sym)
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (d, &keys[i]);
+		      print_key (p.d, &keys[i]);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -329,7 +298,7 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 		  if (e.xkey.keycode == keys[i].key.code
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (d, &keys[i]);
+		      print_key (p.d, &keys[i]);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -347,14 +316,14 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 
 	  e.xkey.state &= ~(numlock_mask | capslock_mask | scrolllock_mask);
 
-	  for (i = 0; i < nb_keys; i++)
+	  for (int i = 0; i < nb_keys; i++)
 	    {
 	      if (keys[i].type == SYM && keys[i].event_type == RELEASE)
 		{
-		  if (e.xkey.keycode == XKeysymToKeycode (d, keys[i].key.sym)
+		  if (e.xkey.keycode == XKeysymToKeycode (p.d, keys[i].key.sym)
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (d, &keys[i]);
+		      print_key (p.d, &keys[i]);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -365,7 +334,7 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 		  if (e.xkey.keycode == keys[i].key.code
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (d, &keys[i]);
+		      print_key (p.d, &keys[i]);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -385,7 +354,7 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 			       | Button1Mask | Button2Mask | Button3Mask
 			       | Button4Mask | Button5Mask);
 
-	  for (i = 0; i < nb_keys; i++)
+	  for (int i = 0; i < nb_keys; i++)
 	    {
 	      if (keys[i].type == BUTTON && keys[i].event_type == PRESS)
 		{
@@ -393,11 +362,11 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 		      && e.xbutton.state == keys[i].modifier)
 		    {
                       //printf("Replay!!!\n");
-                      //ungrab_all_keys(d);
-                      //XPutBackEvent(d, &e);
+                      //ungrab_all_keys(p.d);
+                      //XPutBackEvent(p.d, &e);
                       //sleep(1);
-                      //grab_keys(d);
-		      print_key (d, &keys[i]);
+                      //grab_keys(p.d);
+		      print_key (p.d, &keys[i]);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -417,14 +386,14 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 			       | Button1Mask | Button2Mask | Button3Mask
 			       | Button4Mask | Button5Mask);
 
-	  for (i = 0; i < nb_keys; i++)
+	  for (int i = 0; i < nb_keys; i++)
 	    {
 	      if (keys[i].type == BUTTON && keys[i].event_type == RELEASE)
 		{
 		  if (e.xbutton.button == keys[i].key.button
 		      && e.xbutton.state == keys[i].modifier)
 		    {
-		      print_key (d, &keys[i]);
+		      print_key (p.d, &keys[i]);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -436,5 +405,14 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
 	  break;
 	}
     }				/*  infinite loop */
+  if (verbose)
+    printf ("ending...\n");
+  end_it_all (p.d);
+  
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+    argc=argc; argv=argv;
+  #else
+    return (0);
+  #endif
 }
 

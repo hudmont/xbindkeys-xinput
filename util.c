@@ -16,21 +16,18 @@
  ***************************************************************************/
 
 #include <stdio.h>
-#include <stdlib.h>
+
 #include <X11/Xlib.h>
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
+
+
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+
 #include <fcntl.h>
-#include "xbindkeys.h"
 #include "keys.h"
 #include "options.h"
-#include "get_key.h"
 #include "grab_key.h"
-#include <X11/XKBlib.h>
+#include "xbindkeys.h"
 
 
 #include "util.h"
@@ -167,19 +164,19 @@ null_X_error (Display * d, XErrorEvent * e)
 
 
 extern void
-reload_rc_file (char *rc_guile_file)
+reload_rc_file (Display * d, char *rc_guile_file)
 {
   int min, max;
   int screen;
 
-  XDisplayKeycodes (current_display, &min, &max);
+  XDisplayKeycodes (d, &min, &max);
 
   if (verbose)
     printf ("Reload RC file\n");
 
-  for (screen = 0; screen < ScreenCount (current_display); screen++)
+  for (screen = 0; screen < ScreenCount (d); screen++)
     {
-      XUngrabKey (current_display, AnyKey, AnyModifier, RootWindow (current_display, screen));
+      XUngrabKey (d, AnyKey, AnyModifier, RootWindow (d, screen));
     }
   close_keys ();
 
@@ -187,14 +184,14 @@ reload_rc_file (char *rc_guile_file)
   if (get_rc_guile_file (rc_guile_file) != 0)
     {
 
-      end_it_all (current_display);
+      end_it_all (d);
       exit (-1);
 
 
     }
 
 
-  grab_keys (current_display);
+  grab_keys (d);
 }
 
 /*

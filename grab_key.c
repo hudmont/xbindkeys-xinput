@@ -20,8 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "xbindkeys.h"
+#include "util.h"
 #include "grab_key.h"
-#include "options.h"
+//#include "options.h"
 #include "keys.h"
 
 

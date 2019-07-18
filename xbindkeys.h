@@ -21,7 +21,14 @@
 #include <X11/Xlib.h>
 //#include "config.h"
 
-extern void end_it_all (Display *);
+//extern void end_it_all (Display *);
+//extern char *display_name;
+
+extern int verbose;
+// extern int have_to_show_binding;
+
+extern char *geom;
+
 extern Display *current_display;
 
 #endif /* __XBINDKEYS_H */
