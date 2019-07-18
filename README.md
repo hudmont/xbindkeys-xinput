@@ -10,6 +10,7 @@ With this program, you can create your own shortcuts on X11-based graphical envi
 - X.Org
 - Xinput ( if it's a separate package )
 - GNU Guile
+- popt
 
 Additional requirements to compile from source:
     
@@ -21,12 +22,12 @@ Additional requirements to compile from source:
   make
 
 # Configuration
+
 The configuration is taken care of in the file called 
 	"$HOME/.xbindkeysrc.scm"
 
-You can have a default file with the --defaults option:
-
-	xbindkeys --defaults
+A default configuration file is supplied: xbindkeysrc.scm.
+Copy that to the default location and edit it as you see fit.
 
 The semicolon(;) symbol may be used anywhere for comments. 
 
@@ -76,7 +77,7 @@ Use the -h or --help option for all available options.
 
 	-f
 	--file
-                use an alternative xbindkeysrc.scm (default is $HOME/.xbindkeysrc.scm)
+                use an alternative .xbindkeysrc.scm (default is $HOME/.xbindkeysrc.scm)
 
 	-h
 	--help
@@ -91,13 +92,6 @@ Use the -h or --help option for all available options.
 	--display <display>
                 use XServer at a specified display in standard X form.
                 using this mode allows for multiple displays.
-
-	-d
-	--defaults
-                Show a default configuration file. You can use it to create the file
-                $HOME/.xbindkeysrc.scm like this:
-
-                      xbindkeys --defaults > $HOME/.xbindkeysrc.scm
 
 	-k
 	--key

@@ -24,7 +24,7 @@
 //extern void end_it_all (Display *);
 //extern char *display_name;
 
-extern int verbose;
+//extern int verbose;
 // extern int have_to_show_binding;
 
 extern char *geom;

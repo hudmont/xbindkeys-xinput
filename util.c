@@ -32,24 +32,6 @@
 
 #include "util.h"
 
-extern void
-show_version (void)
-{
-  fprintf (stderr, "xbindkeys %s by Philippe Brochard & @Hudmont\n", PACKAGE_VERSION);
-}
-
-extern void
-show_options (char *display_name, char *rc_guile_file)
-{
-  if (verbose)
-    {
-      printf ("displayName = %s\n", display_name);
-
-      printf ("rc guile file = %s\n", rc_guile_file);
-
-    }
-}
-
 extern int
 rc_file_exist (char *rc_guile_file)
 {
@@ -122,8 +104,9 @@ adjust_display (XAnyEvent * xany)
 
   XGetWindowAttributes (xany->display, xany->window,  &attr);
 
-  if (verbose)
+  #ifdef DEBUG
     printf ("got screen %d for window %x\n", XScreenNumberOfScreen(attr.screen), (unsigned int)xany->window );
+  #endif
 
   ptr = strchr (strchr (envstr, ':'), '.');
   if (ptr)
@@ -164,7 +147,7 @@ null_X_error (Display * d, XErrorEvent * e)
 
 
 extern void
-reload_rc_file (Display * d, char *rc_guile_file)
+reload_rc_file (Display * d, char *rc_guile_file, int verbose)
 {
   int min, max;
   int screen;
@@ -181,7 +164,7 @@ reload_rc_file (Display * d, char *rc_guile_file)
   close_keys ();
 
 
-  if (get_rc_guile_file (rc_guile_file) != 0)
+  if (get_rc_guile_file (d, rc_guile_file) != 0)
     {
 
       end_it_all (d);
@@ -191,35 +174,7 @@ reload_rc_file (Display * d, char *rc_guile_file)
     }
 
 
-  grab_keys (d);
-}
-
-/*
-extern void
-catch_HUP_signal (int sig, char *rc_guile_file)
-{
-  reload_rc_file (rc_guile_file);
-  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
-  //sig=sig; // to avoid warnings
-#endif
-}
-*/
-
-extern void
-catch_CHLD_signal (int sig)
-{
-  pid_t child;
-
-  /*   If more than one child exits at approximately the same time, the signals */
-  /*   may get merged. Handle this case correctly. */
-  while ((child = waitpid(-1, NULL, WNOHANG)) > 0)
-    {
-      if (verbose)
-	printf ("Catch CHLD signal -> pid %i terminated\n", child);
-    }
-  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
-  sig=sig;
-  #endif
+  grab_keys (d, verbose);
 }
 
 extern void
@@ -262,7 +217,7 @@ start_as_daemon (void)
 /*   umask (022); */
 /*   chdir ("/tmp"); */
 }
-
+/*
 #define EQ_button (e.xbutton.button == keys[i].key.button)
 #define EQ_key (e.xkey.keycode == XKeysymToKeycode (d, keys[i].key.sym)
 
@@ -291,11 +246,11 @@ if (keys[i].type == CAPITALIZED_TYPE && keys[i].event_type == EVENT_TYPE)	\
 #define keyPrint printf ("e.xkey.keycode=%d\n", e.xkey.keycode)
 
 #define EVENT_HANDLE(TYPE, EVENT_TYPE)						\
- if (verbose)									\
-	    {									\
-	      printf (#TYPE #EVENT_TYPE "!\n");					\
-	      TYPE##Print;							\
-	      printf ("e.x" #TYPE ".state=%d\n", e.x##TYPE.state);		\
+  #ifdef DEBUG								\
+  printf (#TYPE #EVENT_TYPE "!\n");					\
+  TYPE##Print;							\
+  printf ("e.x" #TYPE ".state=%d\n", e.x##TYPE.state);		\
+  #endif \
 	    } 	     			      					\
 										\
 	  e.x##TYPE.state &= TYPE##Mask;					\
@@ -304,3 +259,4 @@ if (keys[i].type == CAPITALIZED_TYPE && keys[i].event_type == EVENT_TYPE)	\
 	    { 	      	  	   						\
 	      inner_loop_##TYPE(TYPE, CAPITALIZED_TYPE, EVENT_TYPE);		\
 	    }
+*/

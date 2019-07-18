@@ -201,7 +201,7 @@ ungrab_all_keys (Display * dpy)
 
 
 void
-grab_keys (Display * dpy)
+grab_keys (Display * dpy, int verbose)
 {
   int i;
   int min, max;
@@ -209,19 +209,24 @@ grab_keys (Display * dpy)
 
   XDisplayKeycodes (dpy, &min, &max);
 
-  if (verbose)
-    {
+  #ifdef DEBUG
       printf ("\n");
       printf ("min_keycode=%d     max_keycode=%d (ie: know keycodes)\n", min,
 	      max);
-    }
+  #endif
 
   ungrab_all_keys (dpy);
 
 
   for (i = 0; i < nb_keys; i++)
     {
-      print_key (dpy, &keys[i]);
+      #ifdef DEBUG
+        print_key (dpy, &keys[i], verbose);
+      #else
+        #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+          verbose=verbose;
+        #endif
+      #endif
 
       if (keys[i].type == SYM)
 	{
@@ -236,12 +241,8 @@ grab_keys (Display * dpy)
 	      else
 	        {
 	          fprintf (stderr, "--- xbindkeys error ---\n");
-	          if (!verbose)
-		    {
-		      verbose = 1;
-		      print_key (dpy, &keys[i]);
-		      verbose = 0;
-		    }
+
+		  print_key (dpy, &keys[i], 1);
 		  fprintf (stderr,
                            "  The key symbol '%s' cannot be used, as it's not mapped\n"
                            "  on your keyboard.\n"
@@ -273,11 +274,7 @@ grab_keys (Display * dpy)
 	    {
 	      fprintf (stderr, "--- xbindkeys error ---\n");
 
-	      if (!verbose)
-		{
-		  verbose = 1;
-		  print_key (dpy, &keys[i]);
-		}
+	      print_key (dpy, &keys[i], 1);
 
 	      fprintf (stderr,
 		       "  The keycode %d cannot be used, as it's not between the\n"

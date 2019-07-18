@@ -6,7 +6,7 @@ CFLAGS= -Wall -Wextra `pkg-config --cflags $(LIBS)` $(DEFINES)
 SRCS=$(wildcard *.c)
 OBJS = $(SRCS:.c=.o)
 
-LDFLAGS=`pkg-config --libs $(LIBS)`
+LDFLAGS=`pkg-config --libs $(LIBS)` -lffcall
 
 xbindkeys: $(OBJS)
 	$(CC) -o $@ $^ $(LDFLAGS)

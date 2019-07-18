@@ -13,10 +13,6 @@
 
 void end_it_all (Display * d);
 
-extern void show_version (void);
-
-extern void show_options (char *display_name, char *rc_guile_file);
-
 extern int rc_file_exist (char *rc_guile_file);
 
 
@@ -29,7 +25,7 @@ extern void adjust_display (XAnyEvent * xany);
 extern int null_X_error (Display * d, XErrorEvent * e);
 
 
-extern void reload_rc_file (Display *d, char *rc_guile_file);
+extern void reload_rc_file (Display *d, char *rc_guile_file, int verbose);
 
 
 extern void catch_HUP_signal (int sig);
@@ -38,12 +34,11 @@ extern void catch_CHLD_signal (int sig);
 
 extern void start_as_daemon (void);
 
-//extern int already;
-
 struct passed_data {
   Display *d;
   int poll_rc;
   int have_to_show_binding;
+  int verbose;
   char *rc_guile_file;
 };
 

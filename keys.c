@@ -131,19 +131,14 @@ add_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keycode,
 
 
 void
-show_key_binding (Display * d)
+show_key_binding (Display * d, int verbose)
 {
-  int i;
-  int last_verbose = verbose;
 
-  verbose = 1;
-
-  for (i = 0; i < nb_keys; i++)
+  for (int i = 0; i < nb_keys; i++)
     {
-      print_key (d, &keys[i]);
+      print_key (d, &keys[i], verbose);
     }
 
-  verbose = last_verbose;
 }
 
 
@@ -206,7 +201,7 @@ modifier_to_string (unsigned int modifier, char *str)
 
 
 void
-print_key (Display * d, Keys_t * key)
+print_key (Display * d, Keys_t * key, int verbose)
 {
   char str[STR_KEY_LEN];
   int keysyms_per_keycode_return;
@@ -377,8 +372,9 @@ remove_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keyco
 
   if (found_index != -1)
     {
-      if (verbose)
+      #ifdef DEBUG
 	printf ("Removing key index %d\n", found_index);
+      #endif
 
       /* make new array keys_bis */
       keys_bis = (Keys_t *) malloc ((nb_keys - 1) * sizeof (Keys_t));
@@ -415,8 +411,9 @@ run_command (char *command)
 #ifdef FORK_FLAG
   pid_t pid;
 
-  if (verbose)
+  #ifdef DEBUG
     printf ("Start program with fork+exec call\n");
+  #endif
 
   //  if (fork() == 0)
   //  execlp ("sh", "sh", "-c", key->command, NULL);
@@ -434,8 +431,9 @@ run_command (char *command)
   if (pid > 0)
     wait(NULL);
 #else
-  if (verbose)
+  #ifdef DEBUG
     printf ("Start program with system call\n");
+  #endif
 
   system (command);
 #endif

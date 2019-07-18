@@ -68,9 +68,9 @@ extern int remove_key (KeyType_t type, EventType_t event_type, KeySym keysym, Ke
 		       unsigned int button, unsigned int modifier);
 
 
-extern void show_key_binding (Display * d);
+extern void show_key_binding (Display * d, int verbose);
 
-extern void print_key (Display * d, Keys_t * key);
+extern void print_key (Display * d, Keys_t * key, int verbose);
 
 extern void set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
 			unsigned int modifier, char *command, SCM function);

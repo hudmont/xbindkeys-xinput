@@ -22,12 +22,14 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
-//#include <sys/wait.h>
+#include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 //#include <fcntl.h>
+
 #include "xbindkeys.h"
 #include "keys.h"
+
 #include "options.h"
 #include "get_key.h"
 #include "grab_key.h"
@@ -39,14 +41,43 @@
 #include <popt.h>
 #include "util.h"
 
+
 static void inner_main (void *, int, char **);
 Display *current_display;  // The current display
 
-//static char rc_guile_file[512];
-//static Display *d;
+static int got_HUP;
 
-//extern int poll_rc;
+char *geom;
 
+
+void
+catch_HUP_signal (int sig)
+{
+  got_HUP=1;
+  
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+  sig=sig;
+  #endif
+}
+
+
+void
+catch_CHLD_signal (int sig)
+{
+  pid_t child;
+
+  /*   If more than one child exits at approximately the same time, the signals */
+  /*   may get merged. Handle this case correctly. */
+  while ((child = waitpid(-1, NULL, WNOHANG)) > 0)
+    {
+      #ifdef DEBUG
+	printf ("Catch CHLD signal -> pid %i terminated\n", child);
+      #endif
+    }
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+  sig=sig;
+  #endif
+}
 
 
 int
@@ -55,7 +86,7 @@ main (const int argc, const char** argv)
   
   //guile shouldn't steal our arguments! we already parse them!
   //so we put them in temporary variables.
-  
+  got_HUP=0;  
   char c;
   char *home;
 
@@ -67,7 +98,7 @@ main (const int argc, const char** argv)
   strncat (default_file, "/.xbindkeysrc.scm", sizeof (default_file)-1);
 
    // Option definitions
-  verbose = 0;
+  int verbose = 0;
   char *rc_guile_file = NULL;
   int have_to_show_binding = 0;
   int have_to_get_binding = 0;
@@ -122,7 +153,7 @@ main (const int argc, const char** argv)
     switch(c)
       {
       case 'V':
-	show_version ();
+        fprintf (stderr, "xbindkeys %s by Philippe Brochard & @Hudmont\n", PACKAGE_VERSION);
 	exit (1);
 	break;
       case 'v':
@@ -134,8 +165,6 @@ main (const int argc, const char** argv)
 	break;
       }
   }
-  // Just to make sure it's 0-terminated
-  //rc_guile_file[512]='\0';
   
   if (rc_guile_file == NULL)
     {
@@ -150,8 +179,11 @@ main (const int argc, const char** argv)
 
   if (!display_name)
     display_name = XDisplayName (NULL);
-
-  show_options (display_name, rc_guile_file);
+  
+  if(verbose) {
+    printf ("displayName = %s\n", display_name);
+    printf ("rc guile file = %s\n", rc_guile_file);
+  }
 
   d = start (display_name);
   current_display = d;
@@ -178,40 +210,47 @@ main (const int argc, const char** argv)
   struct passed_data to_pass = {.rc_guile_file=rc_guile_file,
 				.have_to_show_binding=have_to_show_binding,
 				.poll_rc = poll_rc,
-				.d = d };
-    
-  //printf("Starting in guile mode...\n"); //debugery! (void *)
-    scm_boot_guile(0,(char**)NULL,inner_main,(void *)(&to_pass));
+				.d = d,
+                                .verbose = verbose };
+  
+  #ifdef DEBUG  
+  printf("Starting in guile mode...\n");
+  #endif
+  
+  scm_boot_guile(0,(char**)NULL,inner_main,(void *)(&to_pass));
+
   return 0; /* not reached ...*/
 }
 
-/*void handle(Display *d, XEvent *e)
+/*void handle(Display *d, XEvent *e, int verbose)
 {
-	print_key (d, &keys[i]);
+	print_key (d, &keys[i], verbose);
 	adjust_display(&e.xany);
 	start_command_key (&keys[i]);			
 }
 */
 
-void init_finalize(Display *d, char *rc_guile_file, int have_to_show_binding)
+void init_finalize(Display *d, char *rc_guile_file, int have_to_show_binding, int verbose)
 {
    // Config loading needs to be done in guilemode, therefore it's here
-  if (get_rc_guile_file (rc_guile_file) != 0)
+  if (get_rc_guile_file (d, rc_guile_file) != 0)
     {
 	  exit (-1);
     }
   // this option requires the preloaded conf file
   if (have_to_show_binding)
     {
-      show_key_binding (d);
+      show_key_binding (d, verbose);
       end_it_all (d);
       exit (0);
     }
 
-  grab_keys (d);
+  grab_keys (d, verbose);
 
-  /* This: for restarting reading the RC file if get a HUP signal */
-  // signal (SIGHUP, catch_HUP_signal);
+  
+  
+  /* This: for restarting reading the RC file if got a HUP signal */
+  signal (SIGHUP, catch_HUP_signal);
   /* and for reaping dead children */
   signal (SIGCHLD, catch_CHLD_signal);
 }
@@ -222,11 +261,11 @@ inner_main (void *passed_data, int argc, char **argv)
   struct passed_data *params = (struct passed_data *) passed_data;
   struct passed_data p = *params;
 
-  init_finalize(p.d, p.rc_guile_file, p.have_to_show_binding);
+  init_finalize(p.d, p.rc_guile_file, p.have_to_show_binding, p.verbose);
 
-  if (verbose)
+  #ifdef DEBUG
     printf ("starting loop...\n");
-  //event_loop (p.d, p.rc_guile_file, p.poll_rc);
+  #endif
 
   XEvent e;
 
@@ -245,7 +284,7 @@ inner_main (void *passed_data, int argc, char **argv)
 
   while (True)
     {
-      while(p.poll_rc && !XPending(p.d))
+      while((got_HUP || p.poll_rc) && !XPending(p.d))
 	{
 
 	  // if the rc guile file has been modified, reload it
@@ -254,12 +293,12 @@ inner_main (void *passed_data, int argc, char **argv)
 
 	  if (rc_guile_file_info.st_mtime != rc_guile_file_changed)
 	    {
-	      reload_rc_file (p.d, p.rc_guile_file);
-	      if (verbose)
-		{
+	      reload_rc_file (p.d, p.rc_guile_file, p.verbose);
+	      #ifdef DEBUG
 		  printf ("The configuration file has been modified, reload it\n");
-		}
+	      #endif
 	      rc_guile_file_changed = rc_guile_file_info.st_mtime;
+	      got_HUP=0;
 
 	    }
 
@@ -271,12 +310,11 @@ inner_main (void *passed_data, int argc, char **argv)
       switch (e.type)
 	{
 	case KeyPress:
-	  if (verbose)
-	    {
-	      printf ("Key press !\n");
-	      printf ("e.xkey.keycode=%d\n", e.xkey.keycode);
-	      printf ("e.xkey.state=%d\n", e.xkey.state);
-	    }
+	  #ifdef DEBUG    
+	  printf ("Key press !\n");
+	  printf ("e.xkey.keycode=%d\n", e.xkey.keycode);
+	  printf ("e.xkey.state=%d\n", e.xkey.state);
+	  #endif
 
 	  e.xkey.state &= ~(numlock_mask | capslock_mask | scrolllock_mask);
 
@@ -287,7 +325,7 @@ inner_main (void *passed_data, int argc, char **argv)
 		  if (e.xkey.keycode == XKeysymToKeycode (p.d, keys[i].key.sym)
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (p.d, &keys[i]);
+		      print_key (p.d, &keys[i], p.verbose);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -298,7 +336,7 @@ inner_main (void *passed_data, int argc, char **argv)
 		  if (e.xkey.keycode == keys[i].key.code
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (p.d, &keys[i]);
+		      print_key (p.d, &keys[i], p.verbose);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -307,12 +345,11 @@ inner_main (void *passed_data, int argc, char **argv)
 	  break;
 
 	case KeyRelease:
-	  if (verbose)
-	    {
+	  #ifdef DEBUG
 	      printf ("Key release !\n");
 	      printf ("e.xkey.keycode=%d\n", e.xkey.keycode);
 	      printf ("e.xkey.state=%d\n", e.xkey.state);
-	    }
+	  #endif
 
 	  e.xkey.state &= ~(numlock_mask | capslock_mask | scrolllock_mask);
 
@@ -323,7 +360,7 @@ inner_main (void *passed_data, int argc, char **argv)
 		  if (e.xkey.keycode == XKeysymToKeycode (p.d, keys[i].key.sym)
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (p.d, &keys[i]);
+		      print_key (p.d, &keys[i], p.verbose);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -334,7 +371,7 @@ inner_main (void *passed_data, int argc, char **argv)
 		  if (e.xkey.keycode == keys[i].key.code
 		      && e.xkey.state == keys[i].modifier)
 		    {
-		      print_key (p.d, &keys[i]);
+		      print_key (p.d, &keys[i], p.verbose);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -343,12 +380,11 @@ inner_main (void *passed_data, int argc, char **argv)
 	  break;
 
 	case ButtonPress:
-	  if (verbose)
-	    {
-	      printf ("Button press !\n");
-	      printf ("e.xbutton.button=%d\n", e.xbutton.button);
-	      printf ("e.xbutton.state=%d\n", e.xbutton.state);
-	    }
+	  #ifdef DEBUG
+	  printf ("Button press !\n");
+	  printf ("e.xbutton.button=%d\n", e.xbutton.button);
+	  printf ("e.xbutton.state=%d\n", e.xbutton.state);
+	  #endif
 
 	  e.xbutton.state &= 0x1FFF & ~(numlock_mask | capslock_mask | scrolllock_mask
 			       | Button1Mask | Button2Mask | Button3Mask
@@ -365,8 +401,8 @@ inner_main (void *passed_data, int argc, char **argv)
                       //ungrab_all_keys(p.d);
                       //XPutBackEvent(p.d, &e);
                       //sleep(1);
-                      //grab_keys(p.d);
-		      print_key (p.d, &keys[i]);
+                      //grab_keys(p.d, p.verbose);
+		      print_key (p.d, &keys[i], p.verbose);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -375,12 +411,11 @@ inner_main (void *passed_data, int argc, char **argv)
 	  break;
 
 	case ButtonRelease:
-	  if (verbose)
-	    {
-	      printf ("Button release !\n");
-	      printf ("e.xbutton.button=%d\n", e.xbutton.button);
-	      printf ("e.xbutton.state=%d\n", e.xbutton.state);
-	    }
+	  #ifdef DEBUG
+	  printf ("Button release !\n");
+	  printf ("e.xbutton.button=%d\n", e.xbutton.button);
+	  printf ("e.xbutton.state=%d\n", e.xbutton.state);
+	  #endif
 
 	  e.xbutton.state &= 0x1FFF & ~(numlock_mask | capslock_mask | scrolllock_mask
 			       | Button1Mask | Button2Mask | Button3Mask
@@ -393,7 +428,7 @@ inner_main (void *passed_data, int argc, char **argv)
 		  if (e.xbutton.button == keys[i].key.button
 		      && e.xbutton.state == keys[i].modifier)
 		    {
-		      print_key (p.d, &keys[i]);
+		      print_key (p.d, &keys[i], p.verbose);
 		      adjust_display(&e.xany);
 		      start_command_key (&keys[i]);
 		    }
@@ -405,8 +440,10 @@ inner_main (void *passed_data, int argc, char **argv)
 	  break;
 	}
     }				/*  infinite loop */
-  if (verbose)
+  
+  #ifdef DEBUG
     printf ("ending...\n");
+  #endif
   end_it_all (p.d);
   
   #ifdef AVOID_KNOWN_HARMLESS_WARNINGS

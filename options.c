@@ -15,37 +15,22 @@
  *                                                                         *
  ***************************************************************************/
 
-//#include "config.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <X11/keysym.h>
 #include <ctype.h>
+//#include <X11/Xlib.h>
+
 #include "options.h"
 #include "xbindkeys.h"
 #include "keys.h"
 #include "grab_key.h"
-
-
-#include <getopt.h>
-
-
+#include <callback.h>
 
 #include <libguile.h>
 
-char *display_name = NULL;
-
-//char rc_guile_file[512];
-
-int verbose = 0;
-
-int have_to_show_binding = 0;
-
-
-
-char *geom = NULL;
-
-int init_xbk_guile_fns (void);
+int init_xbk_guile_fns (Display *d);
 SCM set_numlock_wrapper (SCM x);
 SCM set_scrolllock_wrapper (SCM x);
 SCM set_capslock_wrapper (SCM x);
@@ -53,18 +38,25 @@ SCM xbindkey_wrapper(SCM key, SCM cmd);
 SCM xbindkey_function_wrapper(SCM key, SCM fun);
 SCM remove_xbindkey_wrapper(SCM key);
 SCM run_command_wrapper (SCM command);
-SCM grab_all_keys_wrapper (void);
-SCM ungrab_all_keys_wrapper (void);
+void grab_all_keys_wrapper (void *, va_alist);
+void ungrab_all_keys_wrapper (void *, va_alist);
 SCM remove_all_keys_wrapper (void);
 SCM debug_info_wrapper (void);
 
-//Everything from here on out has been changed by MMH
 
 int
-init_xbk_guile_fns (void)
+init_xbk_guile_fns (Display *d)
 {
-  if (verbose)
+  #ifdef DEBUG
     printf("initializing guile fns...\n");
+  #endif
+    
+  void *ungrab_cb = alloc_callback(&ungrab_all_keys_wrapper,
+				   (void *)d);
+    
+  void *grab_cb =   alloc_callback(  &grab_all_keys_wrapper,
+				     (void *)d);
+  
   scm_c_define_gsubr("set-numlock!", 1, 0, 0, set_numlock_wrapper);
   scm_c_define_gsubr("set-scrolllock!", 1, 0, 0, set_scrolllock_wrapper);
   scm_c_define_gsubr("set-capslock!", 1, 0, 0, set_capslock_wrapper);
@@ -72,20 +64,21 @@ init_xbk_guile_fns (void)
   scm_c_define_gsubr("xbindkey-function", 2, 0, 0, xbindkey_function_wrapper);
   scm_c_define_gsubr("remove-xbindkey", 1, 0, 0, remove_xbindkey_wrapper);
   scm_c_define_gsubr("run-command", 1, 0, 0, run_command_wrapper);
-  scm_c_define_gsubr("grab-all-keys", 0, 0, 0, grab_all_keys_wrapper);
-  scm_c_define_gsubr("ungrab-all-keys", 0, 0, 0, ungrab_all_keys_wrapper);
+  scm_c_define_gsubr("grab-all-keys", 0, 0, 0, grab_cb);
+  scm_c_define_gsubr("ungrab-all-keys", 0, 0, 0, ungrab_cb);
   scm_c_define_gsubr("remove-all-keys", 0, 0, 0, remove_all_keys_wrapper);
   scm_c_define_gsubr("debug", 0, 0, 0, debug_info_wrapper);
   return 0;
 }
 
-int
-get_rc_guile_file (char *rc_guile_file)
+extern int
+get_rc_guile_file (Display *d, char *rc_guile_file)
 {
   FILE *stream;
 
-  if (verbose)
+  #ifdef DEBUG
     printf("getting rc guile file %s.\n", rc_guile_file);
+  #endif
 
   if (init_keys () != 0)
     return (-1);
@@ -93,23 +86,24 @@ get_rc_guile_file (char *rc_guile_file)
   /* Open RC File */
   if ((stream = fopen (rc_guile_file, "r")) == NULL)
     {
-      if (verbose)
-	fprintf (stderr, "WARNING : %s not found or reading not allowed.\n",
+      fprintf (stderr, "ERROR : %s not found or reading not allowed.\n",
 		 rc_guile_file);
       return (-1);
     }
   fclose (stream);
 
-  init_xbk_guile_fns();
+  init_xbk_guile_fns(d);
   scm_primitive_load(scm_from_locale_string(rc_guile_file));
   return 0;
 }
 
+/* Taken out from the following macro
+  #ifdef DEBUG		   \
+    printf("Running mask cmd!\n"); \
+    #endif \*/
 #define MAKE_MASK_WRAPPER(name, mask_name) \
 SCM name (SCM val) \
 { \
-  if (verbose) \
-    printf("Running mask cmd!\n"); \
   mask_name = SCM_FALSEP(val); \
   return SCM_UNSPECIFIED; \
 }
@@ -148,8 +142,9 @@ SCM extract_key (SCM key, KeyType_t *type, EventType_t *event_type,
     /*str = scm_to_locale_string(SCM_CAR(key));*/
 
 
-    if(verbose) //extra verbosity here.
+    #ifdef DEBUG //extra verbosity here.
       printf("xbindkey_wrapper debug: modifier = %s.\n", str);
+    #endif
 
     //copied directly with some substitutions. ie. line2 -> str
     //Do whatever needs to be done with modifiers.
@@ -195,8 +190,9 @@ SCM extract_key (SCM key, KeyType_t *type, EventType_t *event_type,
   }
   len = strlen(str);
 
-  if(verbose)
+  #ifdef DEBUG
     printf("xbindkey_wrapper debug: key = %s\n", str);
+  #endif
 
   //Check for special numeric stuff.
   //This way is really far nicer looking and more efficient than
@@ -214,11 +210,11 @@ SCM extract_key (SCM key, KeyType_t *type, EventType_t *event_type,
 	  *keycode = strtol (str+2, (char **) NULL, 0);
 	  break;
 	case 'm': //is a modifier so it is in the other part.
-	  printf("bad modifyer: %s.", str);
+	  printf("bad modifier: %s.", str);
 	  printf("m: modifiers need be applied to keys\n");
 	  return SCM_BOOL_F;
 	default:
-	  printf("bad modifyer: %c: shoud be b:, c: or m: .\n", str[0]);
+	  printf("bad modifier: %c: shoud be b:, c: or m: .\n", str[0]);
 	  return SCM_BOOL_F;
         }
     }
@@ -251,8 +247,9 @@ SCM xbindkey_wrapper(SCM key, SCM cmd)
 
   //Guile strings are not \0 terminated. hence we must copy.
   cmdstr = scm_to_locale_string(cmd);
-  if(verbose)
+  #ifdef DEBUG
     printf("xbindkey_wrapper debug: cmd=%s.\n", cmdstr);
+  #endif
 
   if (extract_key (key, &type, &event_type, &keysym, &keycode,
 		   &button, &modifier) == SCM_BOOL_F)
@@ -349,19 +346,28 @@ SCM run_command_wrapper (SCM command)
   return SCM_UNSPECIFIED;
 }
 
-SCM grab_all_keys_wrapper (void)
+void grab_all_keys_wrapper (void *data, va_alist alist)
 {
-  grab_keys (current_display);
-
-  return SCM_UNSPECIFIED;
+  #ifdef DEBUG
+  grab_keys ((Display *)data, 1);
+  #else
+  grab_keys ((Display *)data, 0);
+  #endif
+  
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+  alist=alist;
+  #endif
+  //return SCM_UNSPECIFIED;
 }
 
 
-SCM ungrab_all_keys_wrapper (void)
+void ungrab_all_keys_wrapper (void *data, va_alist alist)
 {
-  ungrab_all_keys (current_display);
-
-  return SCM_UNSPECIFIED;
+  ungrab_all_keys ((Display *)data);
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+  alist=alist;
+  #endif
+  //return SCM_UNSPECIFIED;
 }
 
 SCM remove_all_keys_wrapper (void)

@@ -18,7 +18,8 @@
 #ifndef __OPTIONS_H
 #define __OPTIONS_H
 
+#include <X11/Xlib.h>
 
-extern int get_rc_guile_file (char *);
+extern int get_rc_guile_file (Display *, char *);
 
 #endif /* __OPTIONS_H */

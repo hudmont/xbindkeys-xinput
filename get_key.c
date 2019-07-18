@@ -99,8 +99,6 @@ set_sizehints (Display * dpy, XSizeHints * hintp, int min_width,
   #endif
 }
 
-
-
 void
 get_key_binding (Display * dpy, int have_to_get_binding)
 		 //char **argv, int argc)
@@ -147,8 +145,6 @@ get_key_binding (Display * dpy, int have_to_get_binding)
 
   sleep (1);
 
-  verbose = 1;
-
   for (done = 0; !done;)
     {
       XEvent event;
@@ -166,7 +162,7 @@ get_key_binding (Display * dpy, int have_to_get_binding)
 
 	  if (have_to_get_binding == 2)
 	    {
-	      print_key (dpy, &key);
+	      print_key(dpy, &key, 1);
 
 	      if (event.xkey.keycode ==
 		  XKeysymToKeycode (dpy, XStringToKeysym (STOP_KEY)))
@@ -176,7 +172,7 @@ get_key_binding (Display * dpy, int have_to_get_binding)
 	    }
 	  else
 	    {
-	      print_key (dpy, &key);
+	      print_key (dpy, &key, 1);
 
 	      done = 1;
 	    }
@@ -203,7 +199,7 @@ get_key_binding (Display * dpy, int have_to_get_binding)
 	  key.modifier = event.xbutton.state;
 	  key.command = NULL;
 
-	  print_key (dpy, &key);
+	  print_key (dpy, &key, 1);
 
 	  if (have_to_get_binding == 1)
 	    done = 1;

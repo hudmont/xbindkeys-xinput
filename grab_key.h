@@ -18,7 +18,7 @@
 #ifndef __GRABKEY_H
 #define __GRABKEY_H
 
-extern void grab_keys (Display * dpy);
+extern void grab_keys (Display * dpy, int verbose);
 extern void ungrab_all_keys (Display * dpy);
 
 extern void get_offending_modifiers (Display * dpy);
