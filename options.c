@@ -45,11 +45,6 @@ int have_to_show_binding = 0;
 
 char *geom = NULL;
 
-
-static void show_version (void);
-static void show_help (void);
-
-static void show_defaults_guile_rc (void);
 int init_xbk_guile_fns (void);
 SCM set_numlock_wrapper (SCM x);
 SCM set_scrolllock_wrapper (SCM x);

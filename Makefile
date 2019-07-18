@@ -1,6 +1,7 @@
 CC=gcc
 #LIBS=xi x11 guile-2.0 popt
-CFLAGS=-g -Wall -Wextra `pkg-config --cflags xi x11 guile-2.0 popt` -DPACKAGE_VERSION=\"2.0beta\"
+DEFINES = -DPACKAGE_VERSION=\"2.0beta\" -DAVOID_KNOWN_HARMLESS_WARNINGS
+CFLAGS=-g -Wall -Wextra `pkg-config --cflags xi x11 guile-2.0 popt` $(DEFINES)
 #CXXFLAGS=$CFLAGS
 SRCS=$(wildcard *.c)
 OBJS = $(SRCS:.c=.o)

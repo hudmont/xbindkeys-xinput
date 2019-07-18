@@ -93,7 +93,9 @@ set_sizehints (Display * dpy, XSizeHints * hintp, int min_width,
       hintp->y = DisplayHeight (dpy, DefaultScreen (dpy)) + hintp->y -
 	hintp->height;
     }
-  //defx=defx; defy=defy; // to avoid known warnings
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+  defx=defx; defy=defy; // to avoid known warnings
+  #endif
 }
 
 
@@ -178,8 +180,8 @@ get_key_binding (Display * dpy, int have_to_get_binding)
 	      done = 1;
 	    }
 
-	  if (event.xkey.keycode < min_keycode
-	      || event.xkey.keycode > max_keycode)
+	  if (((int) event.xkey.keycode) < min_keycode
+	      || ((int) event.xkey.keycode) > max_keycode)
 	    {
 	      fprintf (stderr,
 		       "Note:\n"

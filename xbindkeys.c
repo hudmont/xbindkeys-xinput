@@ -61,7 +61,7 @@ Display *current_display;  // The current display
 
 
 int
-main (int argc, char** argv)
+main (const int argc, const char** argv)
 {
   
   //guile shouldn't steal our arguments! we already parse them!
@@ -70,7 +70,7 @@ main (int argc, char** argv)
   char c;
   char *home;
   
-  char rc_guile_file[512];
+  char rc_guile_file[513];
   strncpy (rc_guile_file, "", sizeof (rc_guile_file));
 
   verbose = 0;
@@ -116,7 +116,7 @@ main (int argc, char** argv)
 	   "something something autorepeat", NULL},
 	  
 	  POPT_AUTOHELP
-          {NULL, 0, 0,NULL, 0} };
+          {NULL, 0, 0,NULL, 0, NULL, NULL} };
 
   poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[OPTIONS]* <port>");
@@ -138,6 +138,8 @@ main (int argc, char** argv)
 	break;
       }
   }
+  // Just to make sure it's 0-terminated
+  rc_guile_file[512]='\0';
   
   if (strcmp (rc_guile_file, "") == 0)
     {
@@ -146,7 +148,7 @@ main (int argc, char** argv)
       if (rc_guile_file != NULL)
 	{
 	  strncpy (rc_guile_file, home, sizeof (rc_guile_file) - 20);
-	  strncat (rc_guile_file, "/.xbindkeysrc.scm", sizeof (rc_guile_file));
+	  strncat (rc_guile_file, "/.xbindkeysrc.scm", sizeof (rc_guile_file)-1);
 	}
     }
   
@@ -228,25 +230,28 @@ void
 inner_main (void *passed_data, int argc, char **argv)
 {
   struct passed_data *p = (struct passed_data *) passed_data;
-  Display *d=p->d;
-  int have_to_show_binding = p->have_to_show_binding;
-  int poll_rc=p->poll_rc;
-  char *rc_guile_file=p->rc_guile_file;
+  //Display *d=p->d;
+
+  //int poll_rc=p->poll_rc;
+  //char *rc_guile_file=p->rc_guile_file;
   //printf("rc-file-name: %s\n", rc_guile_file);
+  
 
   init_finalize(p->d, p->rc_guile_file, p->have_to_show_binding);
 
   if (verbose)
     printf ("starting loop...\n");
-  event_loop (d, rc_guile_file, poll_rc);
+  event_loop (p->d, p->rc_guile_file, p->poll_rc);
 
   if (verbose)
     printf ("ending...\n");
-  end_it_all (d);
-
-
-  // return (0); // to avoid warnings
-
+  end_it_all (p->d);
+  
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+    argc=argc; argv=argv;
+  #else
+    return (0);
+  #endif
 }
 
 
@@ -259,7 +264,7 @@ event_loop (Display * d, char *rc_guile_file, int poll_rc)
   time_t rc_guile_file_changed = 0;
   struct stat rc_guile_file_info;
 
-  XSetErrorHandler ((XErrorHandler) null_X_error);
+  XSetErrorHandler ((XErrorHandler) &null_X_error);
 
   if (poll_rc)
     {
