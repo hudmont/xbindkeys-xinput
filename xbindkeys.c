@@ -186,7 +186,7 @@ main (const int argc, const char** argv)
   }
 
   d = start (display_name);
-  current_display = d;
+  //current_display = d;
 
   if (detectable_ar)
     {
@@ -233,7 +233,7 @@ main (const int argc, const char** argv)
 void init_finalize(Display *d, char *rc_guile_file, int have_to_show_binding, int verbose)
 {
    // Config loading needs to be done in guilemode, therefore it's here
-  if (get_rc_guile_file (d, rc_guile_file) != 0)
+  if (get_rc_guile_file (d, rc_guile_file, verbose) != 0)
     {
 	  exit (-1);
     }

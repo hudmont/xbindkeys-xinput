@@ -26,11 +26,12 @@
 #include "xbindkeys.h"
 #include "keys.h"
 #include "grab_key.h"
-#include <callback.h>
 
 #include <libguile.h>
+#include <ffi.h>
 
-int init_xbk_guile_fns (Display *d);
+
+int init_xbk_guile_fns (Display *d, int verbose);
 SCM set_numlock_wrapper (SCM x);
 SCM set_scrolllock_wrapper (SCM x);
 SCM set_capslock_wrapper (SCM x);
@@ -38,24 +39,85 @@ SCM xbindkey_wrapper(SCM key, SCM cmd);
 SCM xbindkey_function_wrapper(SCM key, SCM fun);
 SCM remove_xbindkey_wrapper(SCM key);
 SCM run_command_wrapper (SCM command);
-void grab_all_keys_wrapper (void *, va_alist);
-void ungrab_all_keys_wrapper (void *, va_alist);
+
+SCM grab_all_keys_wrapper (Display *, int);
+SCM ungrab_all_keys_wrapper (Display *);
+
 SCM remove_all_keys_wrapper (void);
 SCM debug_info_wrapper (void);
 
+struct grab_params {
+  Display *d;
+  int verbose;
+};
+
+
+void grab_binding(ffi_cif *cif, void *ret, void*  args[],
+		  void *data)
+{
+  struct grab_params p= *(struct grab_params *)data;
+  *(ffi_arg *)ret = (ffi_arg)grab_all_keys_wrapper(p.d,p.verbose);
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+  cif=cif;
+  args=args;
+  #endif
+  }
+
+void ungrab_binding(ffi_cif *cif, void *ret, void*  args[],
+		  void *d)
+{
+  *(ffi_arg *)ret = (ffi_arg)ungrab_all_keys_wrapper((Display *)d);
+  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
+  cif=cif;
+  args=args;
+  #endif
+  }
+
+static struct grab_params P;
+static ffi_cif cif;
+static ffi_type *args[0];
+static ffi_closure *grab_closure, *ungrab_closure;
+static void *bound_grab, *bound_ungrab;
+
 
 int
-init_xbk_guile_fns (Display *d)
+init_xbk_guile_fns (Display *d, int verbose)
 {
   #ifdef DEBUG
-    printf("initializing guile fns...\n");
+  printf("initializing guile fns...\n");
   #endif
-    
-  void *ungrab_cb = alloc_callback(&ungrab_all_keys_wrapper,
-				   (void *)d);
-    
-  void *grab_cb =   alloc_callback(  &grab_all_keys_wrapper,
-				     (void *)d);
+  
+  P.d=d;
+  P.verbose=verbose;
+
+
+  
+  grab_closure   = ffi_closure_alloc(sizeof(ffi_closure), &bound_grab);
+  ungrab_closure = ffi_closure_alloc(sizeof(ffi_closure), &bound_ungrab);
+  
+  if(!grab_closure || !ungrab_closure) {
+    fprintf(stderr, "Couldn't allocate space for the closures!\n");
+    exit(-1);
+    }
+  
+  if(ffi_prep_cif(&cif, FFI_DEFAULT_ABI, 0,
+		  &ffi_type_pointer, args) != FFI_OK)
+    {
+       fprintf(stderr, "Something something error in generating closures!\n");
+       exit(-1);
+    }
+  if(ffi_prep_closure_loc(grab_closure, &cif, grab_binding,
+			  &P, bound_grab) != FFI_OK)
+    {
+      fprintf(stderr, "Error in prepping closure for grab!\n");
+       exit(-1);
+       }
+  if(ffi_prep_closure_loc(ungrab_closure, &cif, ungrab_binding,
+			  d, bound_ungrab) != FFI_OK)
+    {
+      fprintf(stderr, "Error in prepping closure for ungrab!\n");
+       exit(-1);
+       }
   
   scm_c_define_gsubr("set-numlock!", 1, 0, 0, set_numlock_wrapper);
   scm_c_define_gsubr("set-scrolllock!", 1, 0, 0, set_scrolllock_wrapper);
@@ -64,15 +126,18 @@ init_xbk_guile_fns (Display *d)
   scm_c_define_gsubr("xbindkey-function", 2, 0, 0, xbindkey_function_wrapper);
   scm_c_define_gsubr("remove-xbindkey", 1, 0, 0, remove_xbindkey_wrapper);
   scm_c_define_gsubr("run-command", 1, 0, 0, run_command_wrapper);
-  scm_c_define_gsubr("grab-all-keys", 0, 0, 0, grab_cb);
-  scm_c_define_gsubr("ungrab-all-keys", 0, 0, 0, ungrab_cb);
+  
+  scm_c_define_gsubr("grab-all-keys", 0, 0, 0, bound_grab);
+  scm_c_define_gsubr("ungrab-all-keys", 0, 0, 0, bound_ungrab);
+    
   scm_c_define_gsubr("remove-all-keys", 0, 0, 0, remove_all_keys_wrapper);
+  
   scm_c_define_gsubr("debug", 0, 0, 0, debug_info_wrapper);
   return 0;
 }
 
 extern int
-get_rc_guile_file (Display *d, char *rc_guile_file)
+get_rc_guile_file (Display *d, char *rc_guile_file, int verbose)
 {
   FILE *stream;
 
@@ -92,7 +157,7 @@ get_rc_guile_file (Display *d, char *rc_guile_file)
     }
   fclose (stream);
 
-  init_xbk_guile_fns(d);
+  init_xbk_guile_fns(d, verbose);
   scm_primitive_load(scm_from_locale_string(rc_guile_file));
   return 0;
 }
@@ -346,28 +411,23 @@ SCM run_command_wrapper (SCM command)
   return SCM_UNSPECIFIED;
 }
 
-void grab_all_keys_wrapper (void *data, va_alist alist)
+SCM grab_all_keys_wrapper (Display *d, int verbose)
 {
   #ifdef DEBUG
-  grab_keys ((Display *)data, 1);
-  #else
-  grab_keys ((Display *)data, 0);
+  printf("Called grab wrapper callback\n");
   #endif
-  
-  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
-  alist=alist;
-  #endif
-  //return SCM_UNSPECIFIED;
+  grab_keys (d, verbose);
+  return SCM_UNSPECIFIED;
 }
 
 
-void ungrab_all_keys_wrapper (void *data, va_alist alist)
+SCM ungrab_all_keys_wrapper (Display *d)
 {
-  ungrab_all_keys ((Display *)data);
-  #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
-  alist=alist;
+  #ifdef DEBUG
+  printf("Called ungrab wrapper callback\n");
   #endif
-  //return SCM_UNSPECIFIED;
+  ungrab_all_keys (d);
+  return SCM_UNSPECIFIED;
 }
 
 SCM remove_all_keys_wrapper (void)

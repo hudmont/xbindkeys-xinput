@@ -20,6 +20,6 @@
 
 #include <X11/Xlib.h>
 
-extern int get_rc_guile_file (Display *, char *);
+extern int get_rc_guile_file (Display *, char *, int);
 
 #endif /* __OPTIONS_H */

@@ -29,6 +29,6 @@
 
 extern char *geom;
 
-extern Display *current_display;
+//extern Display *current_display;
 
 #endif /* __XBINDKEYS_H */

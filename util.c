@@ -164,7 +164,7 @@ reload_rc_file (Display * d, char *rc_guile_file, int verbose)
   close_keys ();
 
 
-  if (get_rc_guile_file (d, rc_guile_file) != 0)
+  if (get_rc_guile_file (d, rc_guile_file, verbose) != 0)
     {
 
       end_it_all (d);
