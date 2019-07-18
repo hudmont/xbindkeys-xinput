@@ -36,7 +36,7 @@
 #include <libguile.h>
 
 #include <X11/XKBlib.h>
-
+#include <getopt.h>
 
 void end_it_all (Display * d);
 
@@ -97,18 +97,73 @@ if (keys[i].type == CAPITALIZED_TYPE && keys[i].event_type == EVENT_TYPE)	\
 	  for (i = 0; i < nb_keys; i++)						\
 	    { 	      	  	   						\
 	      inner_loop_##TYPE(TYPE, CAPITALIZED_TYPE, EVENT_TYPE);		\
-	    } 									
+	    }
 
-void handle(Display *d, XEvent *e)
+static void
+show_version (void)
 {
-	print_key (d, &keys[i]);
-	adjust_display(&e.xany);
-	start_command_key (&keys[i]);			
+  fprintf (stderr, "xbindkeys %s by Philippe Brochard & @Hudmont\n", PACKAGE_VERSION);
+}
+
+void
+show_options (char *display_name, char *rc_guile_file)
+{
+  if (verbose)
+    {
+      printf ("displayName = %s\n", display_name);
+
+      printf ("rc guile file = %s\n", rc_guile_file);
+
+    }
 }
 
 
+static void
+show_help (void)
+{
+  show_version ();
 
+  fprintf (stderr, "usage: xbindkeys [options]\n");
+  fprintf (stderr, "  where options are:\n");
 
+  fprintf (stderr, "  -V, --version           Print version and exit\n");
+
+  fprintf (stderr, " -d, --print-defaults    Print a default guile configuration file\n");
+
+  fprintf (stderr, "  -f, --file              Use an alternative rc file\n");
+
+  fprintf (stderr, "  -p, --poll-rc           Poll the rc/guile configs for updates\n");
+  fprintf (stderr, "  -h, --help              This help!\n");
+  fprintf (stderr, "  -X, --display           Set X display to use\n");
+  fprintf (stderr,
+	   "  -v, --verbose           More information on xbindkeys when it run\n");
+  fprintf (stderr, "  -s, --show              Show the actual keybinding\n");
+  fprintf (stderr, "  -k, --key               Identify one key pressed\n");
+  fprintf (stderr, " -m, --multikey          Identify multi key pressed\n");
+  fprintf (stderr,
+	   "  -g, --geometry          size and position of window open with -k|-mk option\n");
+  fprintf (stderr, "  -n, --nodaemon          don't start as daemon\n");
+}
+
+int
+rc_file_exist (char *rc_guile_file)
+{
+  FILE * stream;
+
+  if ((stream = fopen (rc_guile_file, "r")) == NULL) {
+    
+    fprintf (stderr, "Error : %s not found or reading not allowed.\n",
+	     rc_guile_file);
+    fprintf (stderr,
+	     "please, create one with 'xbindkeys --defaults-guile > %s'.\n",
+	     rc_guile_file);
+    return 0;
+      
+  } else {
+    fclose (stream);
+    return 1;
+  }
+}
 
 int argc_t; char** argv_t;
 void
@@ -120,10 +175,7 @@ inner_main (int argc, char **argv)
   argc = argc_t;
   argv = argv_t;
 
-
-  get_options (argc, argv);
-
-  if (!rc_file_exist ())
+  if (!rc_file_exist (rc_guile_file))
     exit (-1);
 
   if (have_to_start_as_daemon && !have_to_show_binding && !have_to_get_binding)
@@ -132,7 +184,7 @@ inner_main (int argc, char **argv)
   if (!display_name)
     display_name = XDisplayName (NULL);
 
-  show_options ();
+  show_options (display_name, rc_guile_file);
 
   d = start (display_name);
   current_display = d;
@@ -202,6 +254,95 @@ main (int argc, char** argv)
   //so we put them in temporary variables.
   argv_t = argv;
   argc_t = argc;
+  
+  char c;
+  char *home;
+
+  strncpy (rc_guile_file, "", sizeof (rc_guile_file));
+
+  verbose = 0;
+  have_to_show_binding = 0;
+  have_to_get_binding = 0;
+  have_to_start_as_daemon = 1;
+  
+  static struct option long_options[] =
+        { {"version",        no_argument, 0, 'V'},
+	  {"help",           no_argument, 0, 'h'},
+          {"display",  required_argument, 0, 'X'},
+          {"file",     required_argument, 0, 'f'},
+	  {"geometry",     required_argument, 0, 'g'},
+
+	  {"verbose",        no_argument, &verbose, 1},
+          {"poll_rc",        no_argument, &poll_rc, 1},
+	  {"show",           no_argument, &have_to_show_binding, 1},
+	  {"key",            no_argument, &have_to_get_binding , 1},
+	  {"multikey",       no_argument, &have_to_get_binding , 2},
+	  {"nodaemon",       no_argument, &have_to_start_as_daemon, 0},
+	  {"detectable-ar",  no_argument, &detectable_ar, 1},
+          {0, 0, 0, 0} };
+  int option_index = 0;
+  
+  while((c = getopt_long(argc, argv,"VdhXfgvpskmnD" , long_options, &option_index)) != -1)
+    {
+    switch(c)
+      {
+      case 'V':
+	show_version ();
+	exit (1);
+	break;
+      case 'X':
+	display_name = optarg;
+	break;
+      case 'f':
+	strncpy (rc_guile_file, optarg, sizeof (rc_guile_file) - 1);
+	break;
+      case 'g':
+	geom = optarg;
+	break;
+	// small Duff's device
+      case 0:
+	if(option_index == 6)
+	  {
+	  case 'v':
+	    have_to_start_as_daemon = 0;
+	  }
+	break;
+      case 'p':
+	poll_rc=1;
+	break;
+      case 's':
+	have_to_show_binding=1;
+	break;
+      case 'k':
+	have_to_get_binding=1;
+	break;
+      case 'm':
+	have_to_get_binding=2;
+	break;
+      case 'n':
+	have_to_start_as_daemon=0;
+	break;
+      case 'D':
+        detectable_ar=1;
+	break;
+      case 'h':
+      default:
+	show_help();
+	exit(1);
+      }
+  }
+  
+  if (strcmp (rc_guile_file, "") == 0)
+    {
+      home = getenv ("HOME");
+
+      if (rc_guile_file != NULL)
+	{
+	  strncpy (rc_guile_file, home, sizeof (rc_guile_file) - 20);
+	  strncat (rc_guile_file, "/.xbindkeysrc.scm", sizeof (rc_guile_file));
+	}
+    }
+  
   //printf("Starting in guile mode...\n"); //debugery!
   scm_boot_guile(0,(char**)NULL,(void *)inner_main,NULL);
   return 0; /* not reached ...*/
@@ -235,8 +376,6 @@ and export or setenv it!\n");
   return (d);
 }
 
-
-
 void
 end_it_all (Display * d)
 {
@@ -245,8 +384,6 @@ end_it_all (Display * d)
   close_keys ();
   XCloseDisplay (d);
 }
-
-
 
 static void
 adjust_display (XAnyEvent * xany)
@@ -274,6 +411,13 @@ adjust_display (XAnyEvent * xany)
   putenv (envstr);
 }
 
+/*void handle(Display *d, XEvent *e)
+{
+	print_key (d, &keys[i]);
+	adjust_display(&e.xany);
+	start_command_key (&keys[i]);			
+}
+*/
 
 
 static void
