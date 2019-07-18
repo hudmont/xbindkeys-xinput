@@ -35,7 +35,7 @@
 int nb_keys;
 Keys_t *keys;
 
-extern char rc_guile_file[512];
+//extern char rc_guile_file[512];
 
 static char *modifier_string[] = { "Control", "Shift", "Alt", "Mod2",
   "Mod3", "Mod4", "Mod5"

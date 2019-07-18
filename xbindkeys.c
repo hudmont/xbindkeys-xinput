@@ -51,7 +51,7 @@ static void start_as_daemon (void);
 
 Display *current_display;  // The current display
 
-extern char rc_guile_file[512];
+static char rc_guile_file[512];
 
 extern int poll_rc;
 
@@ -210,7 +210,7 @@ inner_main (int argc, char **argv)
     }
 
 
-  if (get_rc_guile_file () != 0)
+  if (get_rc_guile_file (rc_guile_file) != 0)
     {
 
 	  exit (-1);
@@ -648,7 +648,7 @@ reload_rc_file (void)
   close_keys ();
 
 
-  if (get_rc_guile_file () != 0)
+  if (get_rc_guile_file (rc_guile_file) != 0)
     {
 
       end_it_all (current_display);

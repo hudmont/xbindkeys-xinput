@@ -35,7 +35,7 @@
 
 char *display_name = NULL;
 
-char rc_guile_file[512];
+//char rc_guile_file[512];
 
 int verbose = 0;
 int poll_rc = 0;
