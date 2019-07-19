@@ -19,74 +19,60 @@
 #define __KEYS_H
 
 #include <X11/Xlib.h>
-
 #include <libguile.h>
 
+typedef enum { SYM, CODE, BUTTON } KeyType_t;
 
-typedef enum
-  { SYM, CODE, BUTTON }
-KeyType_t;
+typedef enum { PRESS, RELEASE } EventType_t;
 
-typedef enum
-  { PRESS, RELEASE}
-EventType_t;
+// typedef int SCM;
 
-
-//typedef int SCM;
-
-
-typedef struct
-{
+typedef struct {
   KeyType_t type;
 
   EventType_t event_type;
 
-  union
-  {
+  union {
     KeySym sym;
     KeyCode code;
     unsigned int button;
-  }
-  key;
+  } key;
 
   unsigned int modifier;
   char *command;
-  SCM function;    // This is to call a scheme function instead of a shell command
-                   // when command == NULL (not used when guile is not used).
-}
-Keys_t;
+  SCM function; // This is to call a scheme function instead of a shell command
+                // when command == NULL (not used when guile is not used).
+} Keys_t;
 
+extern int init_keys(void);
+extern void close_keys(void);
 
-extern int init_keys (void);
-extern void close_keys (void);
+extern int add_key(KeyType_t type, EventType_t event_type, KeySym keysym,
+                   KeyCode keycode, unsigned int button, unsigned int modifier,
+                   char *command, SCM function);
 
-extern int add_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keycode,
-		    unsigned int button, unsigned int modifier,
-		    char *command, SCM function);
+extern int remove_key(KeyType_t type, EventType_t event_type, KeySym keysym,
+                      KeyCode keycode, unsigned int button,
+                      unsigned int modifier);
 
-extern int remove_key (KeyType_t type, EventType_t event_type, KeySym keysym, KeyCode keycode,
-		       unsigned int button, unsigned int modifier);
+extern void show_key_binding(Display *d, int verbose);
 
+extern void print_key(Display *d, Keys_t *key, int verbose);
 
-extern void show_key_binding (Display * d, int verbose);
+extern void set_keysym(Keys_t *key, EventType_t event_type, KeySym keysym,
+                       unsigned int modifier, char *command, SCM function);
+extern void set_keycode(Keys_t *key, EventType_t event_type, KeyCode keycode,
+                        unsigned int modifier, char *command, SCM function);
+extern void set_button(Keys_t *key, EventType_t event_type, unsigned int button,
+                       unsigned int modifier, char *command, SCM function);
 
-extern void print_key (Display * d, Keys_t * key, int verbose);
+extern void free_key(Keys_t *key);
 
-extern void set_keysym (Keys_t * key, EventType_t event_type, KeySym keysym,
-			unsigned int modifier, char *command, SCM function);
-extern void set_keycode (Keys_t * key, EventType_t event_type, KeyCode keycode,
-			 unsigned int modifier, char *command, SCM function);
-extern void set_button (Keys_t * key, EventType_t event_type, unsigned int button,
-			unsigned int modifier, char *command, SCM function);
+extern void start_command_key(Keys_t *key);
 
-extern void free_key (Keys_t * key);
+extern void modifier_to_string(unsigned int modifier, char *str);
 
-extern void start_command_key (Keys_t * key);
-
-extern void modifier_to_string (unsigned int modifier, char *str);
-
-extern void run_command (char * command);
-
+extern void run_command(char *command);
 
 extern int nb_keys;
 extern Keys_t *keys;

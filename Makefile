@@ -1,6 +1,6 @@
 CC=gcc
 LIBS=xi x11 guile-2.0 popt libffi
-DEFINES= -DPACKAGE_VERSION=\"2.0beta\" -DAVOID_KNOWN_HARMLESS_WARNINGS -DDEBUG
+DEFINES=-DPACKAGE_VERSION=\"1.9beta\" -DAVOID_KNOWN_HARMLESS_WARNINGS -DDEBUG
 CFLAGS=-g -Wall -Wextra `pkg-config --cflags $(LIBS)` $(DEFINES)
 
 SRCS=$(wildcard *.c)
@@ -15,3 +15,9 @@ xbindkeys: $(OBJS)
 clean:
 	rm -f $(OBJS) xbindkeys
 
+.PHONY: lint
+lint:
+	clang-tidy $(SRCS)  $(DEFINES)
+.PHONY: format
+format:
+	clang-format *.c *.h

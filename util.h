@@ -4,28 +4,23 @@
 
 #define SLEEP_TIME 100
 
-extern void end_it_all (Display * d);
+extern void end_it_all(Display *d);
 
-extern int rc_file_exist (char *rc_guile_file);
+extern int rc_file_exist(char *rc_guile_file);
 
+extern Display *start(char *display);
 
-extern Display *start (char *display);
+extern void adjust_display(XAnyEvent *xany);
 
+extern int null_X_error(Display *d, XErrorEvent *e);
 
-extern void adjust_display (XAnyEvent * xany);
+extern void reload_rc_file(Display *d, char *rc_guile_file, int verbose);
 
+extern void catch_HUP_signal(int sig);
 
-extern int null_X_error (Display * d, XErrorEvent * e);
+extern void catch_CHLD_signal(int sig);
 
-
-extern void reload_rc_file (Display *d, char *rc_guile_file, int verbose);
-
-
-extern void catch_HUP_signal (int sig);
-
-extern void catch_CHLD_signal (int sig);
-
-extern void start_as_daemon (void);
+extern void start_as_daemon(void);
 
 struct passed_data {
   Display *d;

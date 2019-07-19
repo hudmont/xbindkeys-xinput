@@ -18,10 +18,6 @@
 #ifndef __GET_KEY_H
 #define __GET_KEY_H
 
-#include <X11/Xlib.h>
-
-extern void get_key_binding (Display * dpy, int have_to_get_binding, char *geom);
-			     //, char **argv, int argc);
-
+extern void get_key_binding(Display *dpy, int have_to_get_binding, char *geom);
 
 #endif /* __GET_KEY_H */

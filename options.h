@@ -18,6 +18,6 @@
 #ifndef __OPTIONS_H
 #define __OPTIONS_H
 
-extern int get_rc_guile_file (Display *, char *, int);
+extern int get_rc_guile_file(Display *, char *, int);
 
 #endif /* __OPTIONS_H */
