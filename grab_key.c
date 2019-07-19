@@ -50,17 +50,19 @@ void get_offending_modifiers(Display *dpy) {
 
   if (modmap != NULL && modmap->max_keypermod > 0) {
     for (i = 0; i < 8 * modmap->max_keypermod; i++) {
-      if (modmap->modifiermap[i] == nlock && nlock != 0)
+      if (modmap->modifiermap[i] == nlock && nlock != 0) {
         numlock_mask = mask_table[i / modmap->max_keypermod];
-      else if (modmap->modifiermap[i] == slock && slock != 0)
+      } else if (modmap->modifiermap[i] == slock && slock != 0) {
         scrolllock_mask = mask_table[i / modmap->max_keypermod];
+}
     }
   }
 
   capslock_mask = LockMask;
 
-  if (modmap)
+  if (modmap) {
     XFreeModifiermap(modmap);
+}
 }
 
 static void my_grab_key(Display *dpy, KeyCode keycode, unsigned int modifier,
@@ -70,44 +72,52 @@ static void my_grab_key(Display *dpy, KeyCode keycode, unsigned int modifier,
   XGrabKey(dpy, keycode, modifier, (win ? win : DefaultRootWindow(dpy)), False,
            GrabModeAsync, GrabModeAsync);
 
-  if (modifier == AnyModifier)
+  if (modifier == AnyModifier) {
     return;
+}
 
-  if (numlock_mask)
+  if (numlock_mask) {
     XGrabKey(dpy, keycode, modifier | numlock_mask,
              (win ? win : DefaultRootWindow(dpy)), False, GrabModeAsync,
              GrabModeAsync);
+}
 
-  if (capslock_mask)
+  if (capslock_mask) {
     XGrabKey(dpy, keycode, modifier | capslock_mask,
              (win ? win : DefaultRootWindow(dpy)), False, GrabModeAsync,
              GrabModeAsync);
+}
 
-  if (scrolllock_mask)
+  if (scrolllock_mask) {
     XGrabKey(dpy, keycode, modifier | scrolllock_mask,
              (win ? win : DefaultRootWindow(dpy)), False, GrabModeAsync,
              GrabModeAsync);
+}
 
-  if (numlock_mask && capslock_mask)
+  if (numlock_mask && capslock_mask) {
     XGrabKey(dpy, keycode, modifier | numlock_mask | capslock_mask,
              (win ? win : DefaultRootWindow(dpy)), False, GrabModeAsync,
              GrabModeAsync);
+}
 
-  if (numlock_mask && scrolllock_mask)
+  if (numlock_mask && scrolllock_mask) {
     XGrabKey(dpy, keycode, modifier | numlock_mask | scrolllock_mask,
              (win ? win : DefaultRootWindow(dpy)), False, GrabModeAsync,
              GrabModeAsync);
+}
 
-  if (capslock_mask && scrolllock_mask)
+  if (capslock_mask && scrolllock_mask) {
     XGrabKey(dpy, keycode, modifier | capslock_mask | scrolllock_mask,
              (win ? win : DefaultRootWindow(dpy)), False, GrabModeAsync,
              GrabModeAsync);
+}
 
-  if (numlock_mask && capslock_mask && scrolllock_mask)
+  if (numlock_mask && capslock_mask && scrolllock_mask) {
     XGrabKey(dpy, keycode,
              modifier | numlock_mask | capslock_mask | scrolllock_mask,
              (win ? win : DefaultRootWindow(dpy)), False, GrabModeAsync,
              GrabModeAsync);
+}
 }
 
 static void my_grab_button(Display *dpy, unsigned int button,
@@ -118,51 +128,59 @@ static void my_grab_button(Display *dpy, unsigned int button,
               False, ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
               GrabModeAsync, None, None);
 
-  if (modifier == AnyModifier)
+  if (modifier == AnyModifier) {
     return;
+}
 
-  if (numlock_mask)
+  if (numlock_mask) {
     XGrabButton(dpy, button, modifier | numlock_mask,
                 (win ? win : DefaultRootWindow(dpy)), False,
                 ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
                 GrabModeAsync, None, None);
+}
 
-  if (capslock_mask)
+  if (capslock_mask) {
     XGrabButton(dpy, button, modifier | capslock_mask,
                 (win ? win : DefaultRootWindow(dpy)), False,
                 ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
                 GrabModeAsync, None, None);
+}
 
-  if (scrolllock_mask)
+  if (scrolllock_mask) {
     XGrabButton(dpy, button, modifier | scrolllock_mask,
                 (win ? win : DefaultRootWindow(dpy)), False,
                 ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
                 GrabModeAsync, None, None);
+}
 
-  if (numlock_mask && capslock_mask)
+  if (numlock_mask && capslock_mask) {
     XGrabButton(dpy, button, modifier | numlock_mask | capslock_mask,
                 (win ? win : DefaultRootWindow(dpy)), False,
                 ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
                 GrabModeAsync, None, None);
+}
 
-  if (numlock_mask && scrolllock_mask)
+  if (numlock_mask && scrolllock_mask) {
     XGrabButton(dpy, button, modifier | numlock_mask | scrolllock_mask,
                 (win ? win : DefaultRootWindow(dpy)), False,
                 ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
                 GrabModeAsync, None, None);
+}
 
-  if (capslock_mask && scrolllock_mask)
+  if (capslock_mask && scrolllock_mask) {
     XGrabButton(dpy, button, modifier | capslock_mask | scrolllock_mask,
                 (win ? win : DefaultRootWindow(dpy)), False,
                 ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
                 GrabModeAsync, None, None);
+}
 
-  if (numlock_mask && capslock_mask && scrolllock_mask)
+  if (numlock_mask && capslock_mask && scrolllock_mask) {
     XGrabButton(dpy, button,
                 modifier | numlock_mask | capslock_mask | scrolllock_mask,
                 (win ? win : DefaultRootWindow(dpy)), False,
                 ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
                 GrabModeAsync, None, None);
+}
 }
 
 void ungrab_all_keys(Display *dpy) {

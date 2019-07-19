@@ -100,8 +100,9 @@ void get_key_binding(Display *dpy, int have_to_get_binding, char *geom)
   printf("Press combination of keys or/and click under the window.\n");
   printf("You can use one of the two lines after \"NoCommand\"\n");
   printf("in $HOME/.xbindkeysrc to bind a key.\n");
-  if (have_to_get_binding == 2)
+  if (have_to_get_binding == 2) {
     printf("\n--- Press \"%s\" to stop. ---\n", STOP_KEY);
+}
 
   screen = DefaultScreen(dpy);
 
@@ -181,8 +182,9 @@ void get_key_binding(Display *dpy, int have_to_get_binding, char *geom)
 
       print_key(dpy, &key, 1);
 
-      if (have_to_get_binding == 1)
+      if (have_to_get_binding == 1) {
         done = 1;
+}
       break;
 
     default:

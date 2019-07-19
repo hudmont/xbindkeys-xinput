@@ -41,10 +41,10 @@ extern int rc_file_exist(char *rc_guile_file) {
             rc_guile_file);
     return 0;
 
-  } else {
+  } 
     fclose(stream);
     return 1;
-  }
+  
 }
 
 void end_it_all(Display *d) {
@@ -92,21 +92,24 @@ extern void adjust_display(XAnyEvent *xany) {
 #endif
 
   ptr = strchr(strchr(envstr, ':'), '.');
-  if (ptr)
+  if (ptr) {
     *ptr = '\0';
+}
 
   snprintf(buf, sizeof(buf), ".%i", XScreenNumberOfScreen(attr.screen));
   strncat(envstr, buf, 16);
 
   putenv(envstr);
+  //free(envstr);
 }
 
-extern int null_X_error(Display *d, XErrorEvent *e) {
+extern int null_x_error(Display *d, XErrorEvent *e) {
   static int already = 0;
 
   /* The warning is displayed only once */
-  if (already != 0)
+  if (already != 0) {
     return 0;
+}
   already = 1;
 
   printf("\n*** Warning ***\n");
@@ -132,8 +135,9 @@ extern void reload_rc_file(Display *d, char *rc_guile_file, int verbose) {
 
   XDisplayKeycodes(d, &min, &max);
 
-  if (verbose)
+  if (verbose) {
     printf("Reload RC file\n");
+}
 
   for (screen = 0; screen < ScreenCount(d); screen++) {
     XUngrabKey(d, AnyKey, AnyModifier, RootWindow(d, screen));

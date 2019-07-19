@@ -45,8 +45,9 @@ int init_keys(void) {
 void close_keys(void) {
   int i;
 
-  for (i = 0; i < nb_keys; i++)
+  for (i = 0; i < nb_keys; i++) {
     free_key(&keys[i]);
+}
 
   if (keys != NULL) {
     free(keys);
@@ -70,8 +71,9 @@ int add_key(KeyType_t type, EventType_t event_type, KeySym keysym,
 
   /* make new array keys_bis */
   keys_bis = (Keys_t *)malloc((nb_keys + 1) * sizeof(Keys_t));
-  if (keys_bis == NULL)
+  if (keys_bis == NULL) {
     return (-1);
+}
 
   if (keys != NULL) {
     /* copy keys in keys_bis */
@@ -115,44 +117,51 @@ void modifier_to_string(unsigned int modifier, char *str) {
   str[0] = '\0';
 
   if (modifier & ControlMask) {
-    if (str[0])
+    if (str[0]) {
       strncat(str, "+", STR_KEY_LEN);
+}
     strncat(str, modifier_string[0], STR_KEY_LEN);
   }
 
   if (modifier & ShiftMask) {
-    if (str[0])
+    if (str[0]) {
       strncat(str, "+", STR_KEY_LEN);
+}
     strncat(str, modifier_string[1], STR_KEY_LEN);
   }
 
   if (modifier & Mod1Mask) {
-    if (str[0])
+    if (str[0]) {
       strncat(str, "+", STR_KEY_LEN);
+}
     strncat(str, modifier_string[2], STR_KEY_LEN);
   }
 
   if (modifier & Mod2Mask) {
-    if (str[0])
+    if (str[0]) {
       strncat(str, "+", STR_KEY_LEN);
+}
     strncat(str, modifier_string[3], STR_KEY_LEN);
   }
 
   if (modifier & Mod3Mask) {
-    if (str[0])
+    if (str[0]) {
       strncat(str, "+", STR_KEY_LEN);
+}
     strncat(str, modifier_string[4], STR_KEY_LEN);
   }
 
   if (modifier & Mod4Mask) {
-    if (str[0])
+    if (str[0]) {
       strncat(str, "+", STR_KEY_LEN);
+}
     strncat(str, modifier_string[5], STR_KEY_LEN);
   }
 
   if (modifier & Mod5Mask) {
-    if (str[0])
+    if (str[0]) {
       strncat(str, "+", STR_KEY_LEN);
+}
     strncat(str, modifier_string[6], STR_KEY_LEN);
   }
 }
@@ -209,8 +218,9 @@ void set_keysym(Keys_t *key, EventType_t event_type, KeySym keysym,
   if (command != NULL) {
     key->command = (char *)malloc((strlen(command) + 1) * sizeof(char));
 
-    if (key->command != NULL)
+    if (key->command != NULL) {
       strncpy(key->command, command, strlen(command) + 1);
+}
   } else {
     key->command = NULL;
   }
@@ -235,8 +245,9 @@ void set_keycode(Keys_t *key, EventType_t event_type, KeyCode keycode,
   if (command != NULL) {
     key->command = (char *)malloc((strlen(command) + 1) * sizeof(char));
 
-    if (key->command != NULL)
+    if (key->command != NULL) {
       strncpy(key->command, command, strlen(command) + 1);
+}
   } else {
     key->command = NULL;
   }
@@ -254,8 +265,9 @@ void set_button(Keys_t *key, EventType_t event_type, unsigned int button,
   if (command != NULL) {
     key->command = (char *)malloc((strlen(command) + 1) * sizeof(char));
 
-    if (key->command != NULL)
+    if (key->command != NULL) {
       strncpy(key->command, command, strlen(command) + 1);
+}
   } else {
     key->command = NULL;
   }
@@ -269,8 +281,9 @@ void free_key(Keys_t *key) {
   key->key.sym = 0;
   key->modifier = 0;
 
-  if (key->command != NULL)
+  if (key->command != NULL) {
     free(key->command);
+}
 
   key->function = 0;
 }
@@ -291,8 +304,9 @@ int remove_key(KeyType_t type, EventType_t event_type, KeySym keysym,
         keys[i].modifier == modifier &&
         ((type == SYM && keys[i].key.sym == keysym) ||
          (type == CODE && keys[i].key.code == keycode) ||
-         (type == BUTTON && keys[i].key.button == button)))
+         (type == BUTTON && keys[i].key.button == button))) {
       found_index = i;
+}
   }
 
   if (found_index != -1) {
@@ -302,14 +316,17 @@ int remove_key(KeyType_t type, EventType_t event_type, KeySym keysym,
 
     /* make new array keys_bis */
     keys_bis = (Keys_t *)malloc((nb_keys - 1) * sizeof(Keys_t));
-    if (keys_bis == NULL)
+    if (keys_bis == NULL) {
       return (-1);
+}
 
-    for (i = 0; i < found_index; i++)
+    for (i = 0; i < found_index; i++) {
       keys_bis[i] = keys[i];
+}
 
-    for (i = found_index + 1; i < nb_keys; i++)
+    for (i = found_index + 1; i < nb_keys; i++) {
       keys_bis[i - 1] = keys[i];
+}
 
     free_key(&keys[found_index]);
     free(keys);

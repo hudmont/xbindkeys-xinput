@@ -1,9 +1,10 @@
 CC=gcc
 LIBS=xi x11 guile-2.0 popt libffi
-DEFINES=-DPACKAGE_VERSION=\"1.9beta\" -DAVOID_KNOWN_HARMLESS_WARNINGS -DDEBUG
-CFLAGS=-g -Wall -Wextra `pkg-config --cflags $(LIBS)` $(DEFINES)
+DEFINES=-DPACKAGE_VERSION=\"1.9beta\" -DAVOID_KNOWN_HARMLESS_WARNINGS -DDEBUG -DFORK_FLAG
+CFLAGS=-g -std=gnu11 -Wall -Wextra `pkg-config --cflags $(LIBS)` $(DEFINES)
 
 SRCS=$(wildcard *.c)
+HDRS=$(wildcard *.h)
 OBJS = $(SRCS:.c=.o)
 
 LDFLAGS=`pkg-config --libs $(LIBS)`
@@ -17,7 +18,4 @@ clean:
 
 .PHONY: lint
 lint:
-	clang-tidy $(SRCS)  $(DEFINES)
-.PHONY: format
-format:
-	clang-format *.c *.h
+	clang-tidy $(SRCS) $(HDRS) -- $(CFLAGS)

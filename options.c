@@ -4,7 +4,7 @@
     begin                : Sat Oct 13 14:11:34 CEST 2001
     copyright            : (C) 2001 by Philippe Brochard
     email                : hocwp@free.fr
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
  *                                                                         *
@@ -15,32 +15,32 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
-#include <libguile.h>
 #include <ffi.h>
+#include <libguile.h>
 
 #include "grab_key.h"
 #include "keys.h"
 #include "options.h"
 
 int init_xbk_guile_fns(Display *d, int verbose);
-SCM set_numlock_wrapper(SCM x);
-SCM set_scrolllock_wrapper(SCM x);
-SCM set_capslock_wrapper(SCM x);
+SCM set_numlock_wrapper(SCM val);
+SCM set_scrolllock_wrapper(SCM val);
+SCM set_capslock_wrapper(SCM val);
 SCM xbindkey_wrapper(SCM key, SCM cmd);
 SCM xbindkey_function_wrapper(SCM key, SCM fun);
 SCM remove_xbindkey_wrapper(SCM key);
 SCM run_command_wrapper(SCM command);
 
-SCM grab_all_keys_wrapper(Display *, int);
-SCM ungrab_all_keys_wrapper(Display *);
+SCM grab_all_keys_wrapper(Display * /*d*/, int /*verbose*/);
+SCM ungrab_all_keys_wrapper(Display * /*d*/);
 
 SCM remove_all_keys_wrapper(void);
 SCM debug_info_wrapper(void);
@@ -72,7 +72,7 @@ void ungrab_binding(ffi_cif *cif, void *ret, void *args[], void *d) {
 // expire and cause segfaults
 // The closures are needed to remove the pain of having
 // a lot of globals
-static struct grab_params P;
+static struct grab_params p;
 static ffi_cif cif;
 static ffi_type *args[0];
 static ffi_closure *grab_closure, *ungrab_closure;
@@ -83,8 +83,8 @@ int init_xbk_guile_fns(Display *d, int verbose) {
   printf("initializing guile fns...\n");
 #endif
 
-  P.d = d;
-  P.verbose = verbose;
+  p.d = d;
+  p.verbose = verbose;
 
   // adapted from the examples provided in the docs of libffi
   grab_closure = ffi_closure_alloc(sizeof(ffi_closure), &bound_grab);
@@ -100,7 +100,7 @@ int init_xbk_guile_fns(Display *d, int verbose) {
     fprintf(stderr, "Something something error in generating closures!\n");
     exit(-1);
   }
-  if (ffi_prep_closure_loc(grab_closure, &cif, grab_binding, &P, bound_grab) !=
+  if (ffi_prep_closure_loc(grab_closure, &cif, grab_binding, &p, bound_grab) !=
       FFI_OK) {
     fprintf(stderr, "Error in prepping closure for grab!\n");
     exit(-1);
@@ -134,8 +134,9 @@ extern int get_rc_guile_file(Display *d, char *rc_guile_file, int verbose) {
   printf("getting rc guile file %s.\n", rc_guile_file);
 #endif
 
-  if (init_keys() != 0)
+  if (init_keys() != 0) {
     return (-1);
+  }
 
   /* Open RC File */
   if ((stream = fopen(rc_guile_file, "r")) == NULL) {
@@ -151,13 +152,13 @@ extern int get_rc_guile_file(Display *d, char *rc_guile_file, int verbose) {
 }
 
 /* Taken out from the following macro
-  #ifdef DEBUG		   \
-    printf("Running mask cmd!\n"); \
-    #endif \*/
-#define MAKE_MASK_WRAPPER(name, mask_name)                                     \
-  SCM name(SCM val) {                                                          \
-    mask_name = SCM_FALSEP(val);                                               \
-    return SCM_UNSPECIFIED;                                                    \
+   #ifdef DEBUG		   \
+   printf("Running mask cmd!\n"); \
+   #endif \*/
+#define MAKE_MASK_WRAPPER(name, mask_name)	\
+  SCM name(SCM val) {				\
+    (mask_name) = SCM_FALSEP(val);		\
+    return SCM_UNSPECIFIED;			\
   }
 
 MAKE_MASK_WRAPPER(set_numlock_wrapper, numlock_mask);
@@ -195,24 +196,24 @@ SCM extract_key(SCM key, KeyType_t *type, EventType_t *event_type,
 
     // copied directly with some substitutions. ie. line2 -> str
     // Do whatever needs to be done with modifiers.
-    if (strncasecmp(str, "control", len) == 0)
+    if (strncasecmp(str, "control", len) == 0) {
       *modifier |= ControlMask;
-    else if (strncasecmp(str, "shift", len) == 0)
+    } else if (strncasecmp(str, "shift", len) == 0) {
       *modifier |= ShiftMask;
-    else if (strncasecmp(str, "mod1", len) == 0 ||
-             strncasecmp(str, "alt", len) == 0)
+    } else if (strncasecmp(str, "mod1", len) == 0 ||
+	       strncasecmp(str, "alt", len) == 0) {
       *modifier |= Mod1Mask;
-    else if (strncasecmp(str, "mod2", len) == 0)
+    } else if (strncasecmp(str, "mod2", len) == 0) {
       *modifier |= Mod2Mask;
-    else if (strncasecmp(str, "mod3", len) == 0)
+    } else if (strncasecmp(str, "mod3", len) == 0) {
       *modifier |= Mod3Mask;
-    else if (strncasecmp(str, "mod4", len) == 0)
+    } else if (strncasecmp(str, "mod4", len) == 0) {
       *modifier |= Mod4Mask;
-    else if (strncasecmp(str, "mod5", len) == 0)
+    } else if (strncasecmp(str, "mod5", len) == 0) {
       *modifier |= Mod5Mask;
-    else if (strncasecmp(str, "release", len) == 0)
+    } else if (strncasecmp(str, "release", len) == 0) {
       *event_type = RELEASE;
-    else if (strlen(str) > 2 && str[0] == 'm' && str[1] == ':') {
+    } else if (strlen(str) > 2 && str[0] == 'm' && str[1] == ':') {
       *modifier |= strtol(str + 2, (char **)NULL, 0);
       // this break have nothing to do here!
       // break
@@ -235,7 +236,7 @@ SCM extract_key(SCM key, KeyType_t *type, EventType_t *event_type,
   } else {
     str = scm_to_locale_string(key);
   }
-  len = strlen(str);
+  //len = strlen(str);
 
 #ifdef DEBUG
   printf("xbindkey_wrapper debug: key = %s\n", str);
@@ -263,14 +264,14 @@ SCM extract_key(SCM key, KeyType_t *type, EventType_t *event_type,
       return SCM_BOOL_F;
     }
   } else // regular key
-  {
-    *type = SYM;
-    *keysym = XStringToKeysym(str);
-    if (*keysym == 0) {
-      printf("No keysym for key: %s\n", str);
-      return SCM_BOOL_F;
+    {
+      *type = SYM;
+      *keysym = XStringToKeysym(str);
+      if (*keysym == 0) {
+	printf("No keysym for key: %s\n", str);
+	return SCM_BOOL_F;
+      }
     }
-  }
 
   free(str); // these were used by add key and copied.
 
@@ -329,9 +330,9 @@ SCM xbindkey_function_wrapper(SCM key, SCM fun) {
               tab_scm[0]) != 0) {
     printf("add_key didn't return 0!!!\n");
     return SCM_BOOL_F;
-  } else {
-    printf("add_key ok!!!  fun=%d\n", (scm_procedure_p(fun) == SCM_BOOL_T));
-  }
+  } 
+  printf("add_key ok!!!  fun=%d\n", (scm_procedure_p(fun) == SCM_BOOL_T));
+  
 
   // scm_permanent_object (tab_scm[0]);
   scm_remember_upto_here_1(tab_scm[0]);

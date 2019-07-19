@@ -39,22 +39,22 @@
 #include <X11/XKBlib.h>
 #include <popt.h>
 
-static void inner_main(void *, int, char **);
+static void inner_main(void * /*passed_data*/, int /*argc*/, char ** /*argv*/);
 Display *current_display; // The current display
 
-static int got_HUP;
+static int got_hup;
 
 char *geom;
 
-void catch_HUP_signal(int sig) {
-  got_HUP = 1;
+void catch_hup_signal(int sig) {
+  got_hup = 1;
 
 #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
   sig = sig;
 #endif
 }
 
-void catch_CHLD_signal(int sig) {
+void catch_chld_signal(int sig) {
   pid_t child;
 
   /*   If more than one child exits at approximately the same time, the signals
@@ -70,11 +70,11 @@ void catch_CHLD_signal(int sig) {
 #endif
 }
 
-int main(const int argc, const char **argv) {
+int main(const int ARGC, const char **argv) {
 
   // guile shouldn't steal our arguments! we already parse them!
   // so we put them in temporary variables.
-  got_HUP = 0;
+  got_hup = 0;
   char c;
   char *home;
 
@@ -83,7 +83,7 @@ int main(const int argc, const char **argv) {
   home = getenv("HOME");
 
   strncpy(default_file, home, sizeof(default_file) - 21);
-  strncat(default_file, "/.xbindkeysrc.scm", sizeof(default_file) - 1);
+  strncat(default_file, "/.xbindkeysrc.scm", sizeof(default_file) - strlen(default_file) - 1);
 
   // Option definitions
   int verbose = 0;
@@ -97,7 +97,7 @@ int main(const int argc, const char **argv) {
   char *geom = NULL;
   Display *d;
 
-  struct poptOption optionsTable[] = {
+  struct poptOption options_table[] = {
       {"version", 'V', 0, NULL, 'V', "prints version and exit", NULL},
 
       {"display", 'X', POPT_ARG_STRING, &display_name, 0,
@@ -128,10 +128,10 @@ int main(const int argc, const char **argv) {
 
       POPT_AUTOHELP{NULL, 0, 0, NULL, 0, NULL, NULL}};
 
-  poptContext optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
-  poptSetOtherOptionHelp(optCon, "[OPTIONS]*");
+  poptContext opt_con = poptGetContext(NULL, ARGC, argv, options_table, 0);
+  poptSetOtherOptionHelp(opt_con, "[OPTIONS]*");
 
-  while ((c = poptGetNextOpt(optCon)) >= 0) {
+  while ((c = poptGetNextOpt(opt_con)) >= 0) {
     switch (c) {
     case 'V':
       fprintf(stderr, "xbindkeys %s by Philippe Brochard & @Hudmont\n",
@@ -152,14 +152,17 @@ int main(const int argc, const char **argv) {
     rc_guile_file = default_file;
   }
 
-  if (!rc_file_exist(rc_guile_file))
+  if (!rc_file_exist(rc_guile_file)) {
     exit(-1);
+  }
 
-  if (have_to_start_as_daemon && !have_to_show_binding && !have_to_get_binding)
+  if (have_to_start_as_daemon && !have_to_show_binding && !have_to_get_binding) {
     start_as_daemon();
+  }
 
-  if (!display_name)
+  if (!display_name) {
     display_name = XDisplayName(NULL);
+  }
 
   if (verbose) {
     printf("displayName = %s\n", display_name);
@@ -176,10 +179,15 @@ int main(const int argc, const char **argv) {
     if (!supported_rtrn) {
       fprintf(stderr, "Could not set detectable autorepeat\n");
     }
+    
   }
-
+  #ifdef DEBUG
+  printf("Autorepeat brach resolved!\n");
+  #endif
   get_offending_modifiers(d);
-
+  #ifdef DEBUG
+  printf("Offending modifiers retrieved!\n");
+  #endif
   if (have_to_get_binding) {
     get_key_binding(d, have_to_get_binding, geom);
     end_it_all(d);
@@ -190,6 +198,7 @@ int main(const int argc, const char **argv) {
                                 .poll_rc = poll_rc,
                                 .d = d,
                                 .verbose = verbose};
+  //free(home);
 
 #ifdef DEBUG
   printf("Starting in guile mode...\n");
@@ -224,9 +233,9 @@ void init_finalize(Display *d, char *rc_guile_file, int have_to_show_binding,
   grab_keys(d, verbose);
 
   /* This: for restarting reading the RC file if got a HUP signal */
-  signal(SIGHUP, catch_HUP_signal);
+  signal(SIGHUP, catch_hup_signal);
   /* and for reaping dead children */
-  signal(SIGCHLD, catch_CHLD_signal);
+  signal(SIGCHLD, catch_chld_signal);
 }
 
 void inner_main(void *passed_data, int argc, char **argv) {
@@ -244,7 +253,7 @@ void inner_main(void *passed_data, int argc, char **argv) {
   time_t rc_guile_file_changed = 0;
   struct stat rc_guile_file_info;
 
-  XSetErrorHandler((XErrorHandler)&null_X_error);
+  XSetErrorHandler((XErrorHandler)&null_x_error);
 
   if (p.poll_rc) {
 
@@ -253,7 +262,7 @@ void inner_main(void *passed_data, int argc, char **argv) {
   }
 
   while (True) {
-    while ((got_HUP || p.poll_rc) && !XPending(p.d)) {
+    while ((got_hup || p.poll_rc) && !XPending(p.d)) {
 
       // if the rc guile file has been modified, reload it
       stat(p.rc_guile_file, &rc_guile_file_info);
@@ -264,7 +273,7 @@ void inner_main(void *passed_data, int argc, char **argv) {
         printf("The configuration file has been modified, reload it\n");
 #endif
         rc_guile_file_changed = rc_guile_file_info.st_mtime;
-        got_HUP = 0;
+        got_hup = 0;
       }
 
       usleep(SLEEP_TIME * 1000);
@@ -395,7 +404,5 @@ void inner_main(void *passed_data, int argc, char **argv) {
 #ifdef AVOID_KNOWN_HARMLESS_WARNINGS
   argc = argc;
   argv = argv;
-#else
-  return (0);
 #endif
 }
