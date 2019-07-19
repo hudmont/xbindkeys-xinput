@@ -1,3 +1,12 @@
+2019-07-19  Zsombor Barna <unibro@mailo.com>
+	* options.c: rewrote option parsing to popt
+	* all: deleted most global variables
+	* all: added parameters to functions which needed globals
+	* all: reworked verbose flag
+	* options.c: moved functions to xbindkeys.c and new the util.c
+	* xbindkeys.c: main function expanded, inner_main shortened
+	* xbindkeys.c: added function to do init that needs guile
+
 2019-07-17  Zsombor Barna <unibro@mailo.com>
 	* options.c: Removed support of old rc configuration scheme
 	* options.c: Rewrote option parsing to use getopt
