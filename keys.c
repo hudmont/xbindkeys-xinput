@@ -348,8 +348,9 @@ void run_command(char *command) {
   printf("Start program with fork+exec call\n");
 #endif
 
-  //  if (fork() == 0)
-  //  execlp ("sh", "sh", "-c", key->command, NULL);
+  //  if (fork() == 0) {
+  //    execlp ("sh", "sh", "-c", key->command, NULL);
+  //  }
   if (!(pid = fork())) {
     setsid();
     switch (fork()) {

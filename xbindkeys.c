@@ -83,7 +83,7 @@ int main(const int ARGC, const char **argv) {
   home = getenv("HOME");
 
   strncpy(default_file, home, sizeof(default_file) - 21);
-  strncat(default_file, "/.xbindkeysrc.scm", sizeof(default_file) - strlen(default_file) - 1);
+  strncat(default_file, "/.config/xbindkeysrc.scm", sizeof(default_file) - strlen(default_file) - 1);
 
   // Option definitions
   int verbose = 0;
