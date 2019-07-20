@@ -12,6 +12,7 @@ With this program, you can create your own shortcuts on X11-based graphical envi
 - GNU Guile
 - popt
 - libffi ( guile depends on it but we have it as an explicit dep )
+- posix system ( fork+exec is needed for working properly )
 
 Additional requirements to compile from source:
     
@@ -25,7 +26,7 @@ Additional requirements to compile from source:
 # Configuration
 
 The configuration is taken care of in the file called 
-	"$HOME/.xbindkeysrc.scm"
+	"$HOME/.config/xbindkeysrc.scm"
 
 A default configuration file is supplied: xbindkeysrc.scm.
 Copy that to the default location and edit it as you see fit.
